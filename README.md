@@ -1,6 +1,6 @@
 ## Сервер для обработки изображений
 
-Репозиторий: [https://github.com/ansenya/sampleServ](https://github.com/ansenya/sampleServ) /n
+Репозиторий: [https://github.com/ansenya/sampleServ](https://github.com/ansenya/sampleServ) #
 Эндпоинт: `/process`
 Порт: `8082`
 
