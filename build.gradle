@@ -36,6 +36,4 @@ dependencies {
 
     // opencv
     implementation files('src/main/resources/libs/opencv-470.jar')
-
-
 }
