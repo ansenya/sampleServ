@@ -22,14 +22,13 @@ public class MainController {
     @PostMapping("/process")
     public Model process(@RequestParam(value = "file") MultipartFile file) {
         Model model = null;
-//        String uniqueFilename = UUID.randomUUID() + "." + file.getContentType().split("/")[1];
         String uniqueFilename = UUID.randomUUID() + "." + "jpg";
         String path = PATH_FOLDER + uniqueFilename;
         try {
             Files.copy(file.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
 
             model = Model.builder()
-                    .regularPath("http://"+SERVER_HOST+"/get/"+uniqueFilename)
+                    .regularPath("http://" + SERVER_HOST + "/get/" + uniqueFilename)
                     .build();
             processImage(model, path, uniqueFilename);
 

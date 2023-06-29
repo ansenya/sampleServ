@@ -34,9 +34,8 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
+    // opencv
+    implementation files('src/main/resources/libs/opencv-470.jar')
 
-}
 
-tasks.named('test') {
-    useJUnitPlatform()
 }

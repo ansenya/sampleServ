@@ -11,11 +11,16 @@ public class SampleServApplication {
         try {
             System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
             System.out.println("Version: " + Core.VERSION);
-        } catch (UnsatisfiedLinkError ignored) {}
+        } catch (UnsatisfiedLinkError ignored) {
+        }
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(SampleServApplication.class, args);
+        try {
+            SpringApplication.run(SampleServApplication.class, args);
+        } catch (Exception e){
+            main(args);
+        }
     }
 
 }

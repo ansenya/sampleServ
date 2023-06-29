@@ -17,7 +17,34 @@ public class Utils {
     public static final String PATH_FOLDER = "src/main/resources/static/";
     public static String SERVER_IP;
     public static String SERVER_PORT;
-    public static String SERVER_HOST="localhost:8082";
+    public static String SERVER_HOST = "localhost:8082";
+    private static final String path = "src/main/config/coco.names", cfgPath = "src/main/config/yolov4.cfg", weightsPath = "src/main/config/yolov4.weights";
+    private static Net network;
+    private static List<String> labels, outputLayersNames;
+    private static int amountOfClasses, amountOfOutputLayers;
+    private static MatOfInt outputLayersIndexes;
+
+
+    static {
+        // Инициализация сети
+        network = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+
+        // Инициализация работы на видеокарте
+        // Если OpenCV был собран без поддержки CUDA, то строчки нужно закомментировать
+        network.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
+        network.setPreferableTarget(Dnn.DNN_TARGET_CUDA);
+
+        // Классы
+        labels = labels(path);
+        amountOfClasses = labels.size();
+
+        // Извлекаем наименования выходных слоев.
+        outputLayersNames = getOutputLayerNames(network);
+
+        // Извлекаем индексы выходных слоев.
+        outputLayersIndexes = network.getUnconnectedOutLayers();
+        amountOfOutputLayers = outputLayersIndexes.toArray().length;
+    }
 
     public static void processImage(Model model, String src, String fileName) {
         model.setHexColor(getColor(src));
@@ -34,30 +61,7 @@ public class Utils {
         StringBuilder tags = new StringBuilder();
         Scalar contrastingColor = getContrastingColor(hexToScalar(getContrastingHex(color)));
 
-
-        // Загружаем файл с наименованиями классов.
-        String path = "src/main/config/coco.names";
-        List<String> labels = labels(path);
-        int amountOfClasses = labels.size();
-
-        // Инициализируем сверточную нейронную сеть.
-        String cfgPath = "src/main/config/yolov4.cfg";
-        String weightsPath = "src/main/config/yolov4.weights";
-
-        Net network = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-
-        // Работа на видеокарте
-        network.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
-        network.setPreferableTarget(Dnn.DNN_TARGET_CUDA);
-
-        // Извлекаем наименования выходных слоев.
-        List<String> outputLayersNames = getOutputLayerNames(network);
-
-        // Извлекаем индексы выходных слоев.
-        MatOfInt outputLayersIndexes = network.getUnconnectedOutLayers();
-        int amountOfOutputLayers = outputLayersIndexes.toArray().length;
-
-        // Извлекаем кадр.
+        // Читаем изображение
         frame = Imgcodecs.imread(image);
         height = frame.height();
         width = frame.width();
@@ -113,6 +117,7 @@ public class Utils {
         confidences.fromList(confidencesList);
         Dnn.NMSBoxes(boundingBoxes, confidences, minProbability, threshold, indices);
         Rect newRect = null;
+
         // Если алгоритм выявил ограничительные рамки,
         if (indices.size().height > 0) {
             List<Integer> indicesList = indices.toList();
@@ -163,13 +168,12 @@ public class Utils {
             }
         }
 
-        Imgcodecs.imwrite(PATH_FOLDER + "ai_"+ fileName, frame);
-        model.setAiPath("http://"+SERVER_HOST+"/get/"+"ai_"+fileName);
+        Imgcodecs.imwrite(PATH_FOLDER + "ai_" + fileName, frame);
+        model.setAiPath("http://" + SERVER_HOST + "/get/" + "ai_" + fileName);
 
         frame.setTo(hexToScalar(model.getHexColor()));
-        Imgcodecs.imwrite(PATH_FOLDER + "colored_"+ fileName, frame);
-        model.setColoredPath("http://"+SERVER_HOST+"/get/"+"colored_"+fileName);
-
+        Imgcodecs.imwrite(PATH_FOLDER + "colored_" + fileName, frame);
+        model.setColoredPath("http://" + SERVER_HOST + "/get/" + "colored_" + fileName);
 
         return tags.toString();
     }
