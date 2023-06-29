@@ -39,8 +39,8 @@
 2. Склонируйте репозиторий сервера: git clone https://github.com/ansenya/sampleServ.git
 3. Перейдите в каталог проекта sampleServ.
 4. Скачайте [yolov4.weighs](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights) в папку `src/main/config`
-5. Добавьте (или скачайте [opencv-*.jar](https://drive.google.com/file/d/1NtxUHgiKtgyNM9bgBkAnuL8RbbN-XKz9/view?usp=sharing)) в папку `src/main/resources/libs`
-6. Добавьте в конфигурацию `opencv-*.jar` в **project_structure** (если вы используете IntelijiIDEA) файл нативной библиотеки [libopencv_java*.so](https://drive.google.com/file/d/1wfKi149eeDpARoXjrKdwEXBng0eddxlF/view?usp=sharing) 
+5. Добавьте (или скачайте [opencv-470.jar](https://drive.google.com/file/d/1NtxUHgiKtgyNM9bgBkAnuL8RbbN-XKz9/view?usp=sharing)) в папку `src/main/resources/libs`
+6. Добавьте в конфигурацию `opencv-470.jar` в **project_structure** (если вы используете IntelijiIDEA) файл нативной библиотеки [libopencv_java470.so](https://drive.google.com/file/d/1wfKi149eeDpARoXjrKdwEXBng0eddxlF/view?usp=sharing) 
 7. Запустите сервер. Сервер будет запущен на порту 8082.
   
 Теперь вы можете отправить POST-запрос на http://localhost:8082/process, указав файл изображения в теле запроса с именем `file`. Получите ответ с результатами обработки изображения.
