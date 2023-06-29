@@ -35,7 +35,7 @@
 - hexColor: HEX-код цвета, примененного к изображению.
 
 ### Запуск сервера
-1. Установите и настройте окружение для запуска сервера, включая установку Java и Gradle.
+1. Установите и настройте окружение для запуска сервера, включая установку Java и Gradle. Либо скачайте IntelijiIDEA.
 2. Склонируйте репозиторий сервера: git clone https://github.com/ansenya/sampleServ.git
 3. Перейдите в каталог проекта sampleServ.
 4. Скачайте [yolov4.weighs](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights) в папку `src/main/config`
