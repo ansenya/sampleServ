@@ -34,7 +34,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
-    implementation files('src/main/resources/libs/opencv-460.jar')
+
 }
 
 tasks.named('test') {

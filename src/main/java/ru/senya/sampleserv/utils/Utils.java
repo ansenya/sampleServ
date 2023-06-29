@@ -1,15 +1,12 @@
 package ru.senya.sampleserv.utils;
 
-
 import org.opencv.core.*;
-import org.opencv.core.Point;
 import org.opencv.dnn.Dnn;
 import org.opencv.dnn.Net;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import ru.senya.sampleserv.models.Model;
 
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -20,7 +17,7 @@ public class Utils {
     public static final String PATH_FOLDER = "src/main/resources/static/";
     public static String SERVER_IP;
     public static String SERVER_PORT;
-    public static String SERVER_HOST = "176.99.146.176:8082";
+    public static String SERVER_HOST="localhost:8082";
 
     public static void processImage(Model model, String src, String fileName) {
         model.setHexColor(getColor(src));
@@ -50,8 +47,8 @@ public class Utils {
         Net network = Dnn.readNetFromDarknet(cfgPath, weightsPath);
 
         // Работа на видеокарте
-//        network.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
-//        network.setPreferableTarget(Dnn.DNN_TARGET_CUDA);
+        network.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
+        network.setPreferableTarget(Dnn.DNN_TARGET_CUDA);
 
         // Извлекаем наименования выходных слоев.
         List<String> outputLayersNames = getOutputLayerNames(network);
