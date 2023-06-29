@@ -45,3 +45,22 @@
 7. Запустите сервер. Сервер будет запущен на порту 8082.
   
 Теперь вы можете отправить POST-запрос на http://localhost:8082/process, указав файл изображения в теле запроса с именем `file`. Получите ответ с результатами обработки изображения.
+
+
+
+## Сборка OpenCV для работы с YOLOv4 в Java
+### Сборка для работы на процессоре:
+1. Склонируйте репозиторий OpenCV с GitHub по следующей ссылке: https://github.com/opencv/opencv/archive/refs/tags/4.7.0.zip.
+2. Создайте папку, например, с названием "build", внутри каталога OpenCV, где будет компилироваться библиотека.
+3. Откройте терминал в этой папке и выполните команду `cmake ..`
+4. Затем выполните команду `make -j<N>`, где `<N>` - количество потоков процессора в системе.
+5. После успешной компиляции библиотека будет собрана.  
+### Сборка для работы на видеокарте:
+1. Склонируйте репозиторий OpenCV с GitHub по следующей ссылке: https://github.com/opencv/opencv/archive/refs/tags/4.7.0.zip.
+2. Склонируйте дополнительные компоненты OpenCV, необходимые для компиляции с поддержкой CUDA, по ссылке: https://github.com/opencv/opencv_contrib/archive/refs/tags/4.7.0.zip.
+3. Создайте папку, например, с названием "build", внутри каталога OpenCV, где будет компилироваться библиотека.
+4. Откройте терминал в этой папке и выполните следующую команду:
+`cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_CUDA=ON -D ENABLE_FAST_MATH=1 -D CUDA_FAST_MATH=1 -D WITH_CUBLAS=1 -D WITH_TBB=ON -D BUILD_opencv_java=ON -D BUILD_opencv_python3=OFF -D BUILD_opencv_python2=OFF -D BUILD_TESTS=ON -D BUILD_PERF_TESTS=ON -D OPENCV_EXTRA_MODULES_PATH=<path/modules> .. `  
+Здесь `<path>` - путь к каталогу, где находятся дополнительные компоненты OpenCV (`opencv_contrib`).
+5. Затем выполните команду `make -j<N>`, где `<N>` - количество потоков процессора в системе.
+6. После успешной компиляции библиотека будет собрана.
