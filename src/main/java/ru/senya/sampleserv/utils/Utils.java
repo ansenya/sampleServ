@@ -11,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Utils {
 
@@ -19,26 +21,74 @@ public class Utils {
     public static String SERVER_PORT;
     public static String SERVER_HOST = "192.168.50.85:8082";
     private static final String path = "src/main/config/coco.names", cfgPath = "src/main/config/yolov4.cfg", weightsPath = "src/main/config/yolov4.weights";
-    private static final Net network;
+    private static final Net network1,
+            network2,
+            network3,
+            network4,
+            network5,
+            network6,
+            network7,
+            network8,
+            network9,
+            network10,
+            network11,
+            network12,
+            network13,
+            network14,
+            network15,
+            network16;
+
+    private static final ReentrantLock lock1 = new ReentrantLock(), lock2 = new ReentrantLock(), lock3 = new ReentrantLock(), lock4 = new ReentrantLock(), lock5 = new ReentrantLock(), lock6 = new ReentrantLock(), lock7 = new ReentrantLock(), lock8 = new ReentrantLock(), lock9 = new ReentrantLock(), lock10 = new ReentrantLock(), lock11 = new ReentrantLock(), lock12 = new ReentrantLock(), lock13 = new ReentrantLock(), lock14 = new ReentrantLock(), lock15 = new ReentrantLock(), lock16 = new ReentrantLock(), lock17 = new ReentrantLock(), lock18 = new ReentrantLock(), lock19 = new ReentrantLock(), lock20 = new ReentrantLock(), lock21 = new ReentrantLock(), lock22 = new ReentrantLock(), lock23 = new ReentrantLock(), lock24 = new ReentrantLock();
     private static final List<String> labels, outputLayersNames;
     private static final int amountOfClasses, amountOfOutputLayers;
     private static final MatOfInt outputLayersIndexes;
-
+    private static final Net[] nets;
+    public static long COUNT = 0L;
 
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         System.out.print("OpenCV version: " + Core.VERSION);
 
-        // Инициализация сети
-        network = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network1 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network2 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network3 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network4 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network5 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network6 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network7 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network8 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network9 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network10 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network11 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network12 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network13 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network14 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network15 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network16 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+//        network17 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+//        network18 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+//        network19 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+//        network20 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+//        network21 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+//        network22 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+//        network23 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+//        network24 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+
+        nets = new Net[]{network1, network2, network3, network4, network5, network6, network7, network8, network9, network10, network11, network12, network13, network14, network15, network16};
+
 
         // Инициализация работы на видеокарте
         if (Core.getBuildInformation().contains("CUDA")) {
-            network.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
-            network.setPreferableTarget(Dnn.DNN_TARGET_CUDA_FP16);
+            for (Net net : nets) {
+                net.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
+                net.setPreferableTarget(Dnn.DNN_TARGET_CUDA_FP16);
+            }
+
         } else {
-            network.setPreferableBackend(Dnn.DNN_BACKEND_DEFAULT);
-            network.setPreferableTarget(Dnn.DNN_TARGET_CPU);
+            for (Net net : nets) {
+                net.setPreferableBackend(Dnn.DNN_BACKEND_DEFAULT);
+                net.setPreferableTarget(Dnn.DNN_TARGET_CPU);
+            }
         }
 
         // Классы
@@ -46,21 +96,362 @@ public class Utils {
         amountOfClasses = labels.size();
 
         // Извлекаем наименования выходных слоев.
-        outputLayersNames = getOutputLayerNames();
+        outputLayersNames = getOutputLayerNames(nets[0]);
 
         // Извлекаем индексы выходных слоев.
-        outputLayersIndexes = network.getUnconnectedOutLayers();
+        outputLayersIndexes = nets[0].getUnconnectedOutLayers();
         amountOfOutputLayers = outputLayersIndexes.toArray().length;
 
         cleanStatic();
     }
 
-    public synchronized static void processImage(Model model, String src, String fileName) {
-        model.setHexColor(getColor(src));
-        model.setTags(getTags(src, model.getHexColor(), fileName, model));
+
+    public static void processImages(long COUNT, Model model, CountDownLatch latch, String path, String uniqueFilename) {
+        int i = (int) (COUNT % nets.length);
+        switch (i) {
+            case 0 -> new Thread(() -> {
+                lock1.lock();
+                try {
+                    processImage1(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock1.unlock();
+                }
+            }).start();
+            case 1 -> new Thread(() -> {
+                lock2.lock();
+                try {
+                    processImage2(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock2.unlock();
+                }
+            }).start();
+            case 2 -> new Thread(() -> {
+                lock3.lock();
+                try {
+                    processImage3(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock3.unlock();
+                }
+            }).start();
+            case 3 -> new Thread(() -> {
+                lock4.lock();
+                try {
+                    processImage4(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock4.unlock();
+                }
+            }).start();
+            case 4 -> new Thread(() -> {
+                lock5.lock();
+                try {
+                    processImage5(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock5.unlock();
+                }
+            }).start();
+            case 5 -> new Thread(() -> {
+                lock6.lock();
+                try {
+                    processImage6(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock6.unlock();
+                }
+            }).start();
+            case 6 -> new Thread(() -> {
+                lock7.lock();
+                try {
+                    processImage7(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock7.unlock();
+                }
+            }).start();
+            case 7 -> new Thread(() -> {
+                lock8.lock();
+                try {
+                    processImage8(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock8.unlock();
+                }
+            }).start();
+            case 8 -> new Thread(() -> {
+                lock9.lock();
+                try {
+                    processImage9(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock9.unlock();
+                }
+            }).start();
+            case 9 -> new Thread(() -> {
+                lock10.lock();
+                try {
+                    processImage10(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock10.unlock();
+                }
+            }).start();
+            case 10 -> new Thread(() -> {
+                lock11.lock();
+                try {
+                    processImage11(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock11.unlock();
+                }
+            }).start();
+            case 11 -> new Thread(() -> {
+                lock12.lock();
+                try {
+                    processImage12(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock12.unlock();
+                }
+            }).start();
+            case 12 -> new Thread(() -> {
+                lock13.lock();
+                try {
+                    processImage13(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock13.unlock();
+                }
+            }).start();
+            case 13 -> new Thread(() -> {
+                lock14.lock();
+                try {
+                    processImage14(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock14.unlock();
+                }
+            }).start();
+            case 14 -> new Thread(() -> {
+                lock15.lock();
+                try {
+                    processImage15(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock15.unlock();
+                }
+            }).start();
+            case 15 -> new Thread(() -> {
+                lock16.lock();
+                try {
+                    processImage16(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock16.unlock();
+                }
+            }).start();
+            case 16 -> new Thread(() -> {
+                lock17.lock();
+                try {
+                    processImage17(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock17.unlock();
+                }
+            }).start();
+            case 17 -> new Thread(() -> {
+                lock18.lock();
+                try {
+                    processImage18(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock18.unlock();
+                }
+            }).start();
+            case 18 -> new Thread(() -> {
+                lock19.lock();
+                try {
+                    processImage19(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock19.unlock();
+                }
+            }).start();
+            case 19 -> new Thread(() -> {
+                lock20.lock();
+                try {
+                    processImage20(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock20.unlock();
+                }
+            }).start();
+            case 20 -> new Thread(() -> {
+                lock21.lock();
+                try {
+                    processImage21(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock21.unlock();
+                }
+            }).start();
+            case 21 -> new Thread(() -> {
+                lock22.lock();
+                try {
+                    processImage22(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock22.unlock();
+                }
+            }).start();
+            case 22 -> new Thread(() -> {
+                lock23.lock();
+                try {
+                    processImage23(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock23.unlock();
+                }
+            }).start();
+            case 23 -> new Thread(() -> {
+                lock24.lock();
+                try {
+                    processImage24(model, path, uniqueFilename);
+                    latch.countDown();
+                } finally {
+                    lock24.unlock();
+                }
+            }).start();
+
+        }
     }
 
-    private static String getTags(String image, String color, String fileName, Model model) {
+    public static void processImage1(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[0]));
+    }
+
+    public static void processImage2(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[1]));
+    }
+
+    public static void processImage3(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[2]));
+    }
+
+    public static void processImage4(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[3]));
+    }
+
+    public static void processImage5(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[4]));
+    }
+
+    public static void processImage6(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[5]));
+    }
+
+    public static void processImage7(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[6]));
+    }
+
+    public static void processImage8(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[7]));
+    }
+
+    public static void processImage9(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[8]));
+    }
+
+    public static void processImage10(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[9]));
+    }
+
+    public static void processImage11(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[10]));
+    }
+
+    public static void processImage12(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[11]));
+    }
+
+    public static void processImage13(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[12]));
+    }
+
+    public static void processImage14(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[13]));
+    }
+
+    public static void processImage15(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[14]));
+    }
+
+    public static void processImage16(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[15]));
+    }
+
+    public static void processImage17(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[16]));
+    }
+
+    public static void processImage18(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[17]));
+    }
+
+    public static void processImage19(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[18]));
+    }
+
+    public static void processImage20(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[19]));
+    }
+
+    public static void processImage21(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[20]));
+    }
+
+    public static void processImage22(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[21]));
+    }
+
+    public static void processImage23(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[22]));
+    }
+
+    public static void processImage24(Model model, String src, String fileName) {
+        model.setHexColor(getColor(src));
+        model.setTags(getTags(src, model.getHexColor(), fileName, model, nets[23]));
+    }
+
+
+    private static String getTags(String image, String color, String fileName, Model model, Net net) {
+
         // Инициализируем переменные.
         Mat frame, frameResized = new Mat(), gray;
         float minProbability = 0.5f, threshold = 0.3f;
@@ -79,11 +470,11 @@ public class Utils {
         Imgproc.resize(frame, frameResized, new Size(320, 320));
 
         // Подаём blob на вход нейронной сети.
-        network.setInput(Dnn.blobFromImage(frameResized, 1 / 255.0));
+        net.setInput(Dnn.blobFromImage(frameResized, 1 / 255.0));
 
         // Извлекаем данные с выходных слоев нейронной сети.
         List<Mat> outputFromNetwork = new ArrayList<>();
-        network.forward(outputFromNetwork, outputLayersNames);
+        net.forward(outputFromNetwork, outputLayersNames);
 
 
         // Обнаруживаем объекты на изображении.
@@ -183,7 +574,7 @@ public class Utils {
         frame.setTo(hexToScalar(model.getHexColor()));
         Imgcodecs.imwrite(PATH_FOLDER + "colored_" + fileName, frame);
         model.setColoredPath("http://" + SERVER_HOST + "/get/" + "colored_" + fileName);
-
+        tags.append(Arrays.stream(nets).toList().indexOf(net));
         return tags.toString();
     }
 
@@ -296,10 +687,10 @@ public class Utils {
     }
 
     // Метод для извлечения наименований выходных слоев.
-    private static List<String> getOutputLayerNames() {
-        List<String> layersNames = Utils.network.getLayerNames();
+    private static List<String> getOutputLayerNames(Net network) {
+        List<String> layersNames = network.getLayerNames();
         List<String> outputLayersNames = new ArrayList<>();
-        List<Integer> unconnectedLayersIndexes = Utils.network.getUnconnectedOutLayers().toList();
+        List<Integer> unconnectedLayersIndexes = network.getUnconnectedOutLayers().toList();
         for (int i : unconnectedLayersIndexes) {
             outputLayersNames.add(layersNames.get(i - 1));
         }

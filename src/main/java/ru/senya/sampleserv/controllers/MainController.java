@@ -7,12 +7,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.senya.sampleserv.models.Model;
+import ru.senya.sampleserv.utils.Utils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 import static ru.senya.sampleserv.utils.Utils.*;
 
@@ -21,7 +24,7 @@ public class MainController {
 
     @PostMapping("/process")
     public ResponseEntity<?> process(@RequestParam(value = "file", required = false) MultipartFile file) {
-        if (file==null || file.isEmpty()) {
+        if (file == null || file.isEmpty()) {
             return ResponseEntity.badRequest().body("file is empty");
         }
         Model model = null;
@@ -32,8 +35,11 @@ public class MainController {
             model = Model.builder()
                     .regularPath("http://" + SERVER_HOST + "/get/" + uniqueFilename)
                     .build();
-            processImage(model, path, uniqueFilename);
-        } catch (IOException ignored) {
+            CountDownLatch latch = new CountDownLatch(1);
+            model.setLatch(latch);
+            processImages(COUNT++, model, latch, path, uniqueFilename);
+            latch.await();
+        } catch (IOException | InterruptedException ignored) {
         }
         return ResponseEntity.ok(model);
     }
