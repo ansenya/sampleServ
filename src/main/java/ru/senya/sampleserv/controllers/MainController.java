@@ -3,11 +3,11 @@ package ru.senya.sampleserv.controllers;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.senya.sampleserv.models.Model;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,23 +20,22 @@ import static ru.senya.sampleserv.utils.Utils.*;
 public class MainController {
 
     @PostMapping("/process")
-    public Model process(@RequestParam(value = "file") MultipartFile file) {
+    public ResponseEntity<?> process(@RequestParam(value = "file", required = false) MultipartFile file) {
+        if (file==null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body("file is empty");
+        }
         Model model = null;
-        String uniqueFilename = UUID.randomUUID() + "." + "jpg";
+        String uniqueFilename = UUID.randomUUID() + ".jpeg";
         String path = PATH_FOLDER + uniqueFilename;
         try {
             Files.copy(file.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
-
             model = Model.builder()
                     .regularPath("http://" + SERVER_HOST + "/get/" + uniqueFilename)
                     .build();
             processImage(model, path, uniqueFilename);
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
-        return model;
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping(value = "/get/{imageName:.+}", produces = MediaType.IMAGE_JPEG_VALUE)

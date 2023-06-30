@@ -17,44 +17,52 @@ public class Utils {
     public static final String PATH_FOLDER = "src/main/resources/static/";
     public static String SERVER_IP;
     public static String SERVER_PORT;
-    public static String SERVER_HOST = "localhost:8082";
+    public static String SERVER_HOST = "192.168.50.85:8082";
     private static final String path = "src/main/config/coco.names", cfgPath = "src/main/config/yolov4.cfg", weightsPath = "src/main/config/yolov4.weights";
-    private static Net network;
-    private static List<String> labels, outputLayersNames;
-    private static int amountOfClasses, amountOfOutputLayers;
-    private static MatOfInt outputLayersIndexes;
+    private static final Net network;
+    private static final List<String> labels, outputLayersNames;
+    private static final int amountOfClasses, amountOfOutputLayers;
+    private static final MatOfInt outputLayersIndexes;
 
 
     static {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        System.out.print("OpenCV version: " + Core.VERSION);
+
         // Инициализация сети
         network = Dnn.readNetFromDarknet(cfgPath, weightsPath);
 
         // Инициализация работы на видеокарте
-        // Если OpenCV был собран без поддержки CUDA, то строчки нужно закомментировать
-        network.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
-        network.setPreferableTarget(Dnn.DNN_TARGET_CUDA);
+        if (Core.getBuildInformation().contains("CUDA")) {
+            network.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
+            network.setPreferableTarget(Dnn.DNN_TARGET_CUDA_FP16);
+        } else {
+            network.setPreferableBackend(Dnn.DNN_BACKEND_DEFAULT);
+            network.setPreferableTarget(Dnn.DNN_TARGET_CPU);
+        }
 
         // Классы
-        labels = labels(path);
+        labels = labels();
         amountOfClasses = labels.size();
 
         // Извлекаем наименования выходных слоев.
-        outputLayersNames = getOutputLayerNames(network);
+        outputLayersNames = getOutputLayerNames();
 
         // Извлекаем индексы выходных слоев.
         outputLayersIndexes = network.getUnconnectedOutLayers();
         amountOfOutputLayers = outputLayersIndexes.toArray().length;
+
+        cleanStatic();
     }
 
-    public static void processImage(Model model, String src, String fileName) {
+    public synchronized static void processImage(Model model, String src, String fileName) {
         model.setHexColor(getColor(src));
         model.setTags(getTags(src, model.getHexColor(), fileName, model));
     }
 
     private static String getTags(String image, String color, String fileName, Model model) {
-
         // Инициализируем переменные.
-        Mat frame, frameResized = new Mat(), coloredFrame;
+        Mat frame, frameResized = new Mat(), gray;
         float minProbability = 0.5f, threshold = 0.3f;
         int height, width;
         MatOfInt indices = new MatOfInt();
@@ -63,11 +71,12 @@ public class Utils {
 
         // Читаем изображение
         frame = Imgcodecs.imread(image);
+
         height = frame.height();
         width = frame.width();
 
         // Изменяем размер кадра для уменьшения нагрузки на нейронную сеть.
-        Imgproc.resize(frame, frameResized, new Size(256, 256));
+        Imgproc.resize(frame, frameResized, new Size(320, 320));
 
         // Подаём blob на вход нейронной сети.
         network.setInput(Dnn.blobFromImage(frameResized, 1 / 255.0));
@@ -125,25 +134,25 @@ public class Utils {
 
             // то наносим выявленные рамки на изображения.
             for (int i = 0; i < indicesList.size(); i++) {
-                // Ограничительная рамка
+//                // Ограничительная рамка
                 Rect rect = new Rect(
                         (int) boundingList.get(indicesList.get(i)).x,
                         (int) boundingList.get(indicesList.get(i)).y,
                         (int) boundingList.get(indicesList.get(i)).width,
                         (int) boundingList.get(indicesList.get(i)).height
                 );
-
-                // Извлекаем индекс выявленгого класса (объекта на изображении).
+//
+//                // Извлекаем индекс выявленгого класса (объекта на изображении).
                 int classIndex = classIndexes.get(indices.toList().get(i));
-
-                // Наносим ограничительную рамку.
+//
+//                // Наносим ограничительную рамку.
                 Imgproc.rectangle(frame, rect, contrastingColor, 2);
-
-
-                // Форматируем строку для нанесения на изображение:
-                // Выявленный клас: вероятность
+//
+//
+//                // Форматируем строку для нанесения на изображение:
+//                // Выявленный клас: вероятность
                 String label = labels.get(classIndex) + ": " + String.format("%.2f", confidences.toList().get(i));
-
+//
                 // Инициализируем точку для нанесения текста.
                 Point textPoint = new Point(
                         (int) boundingList.get(indices.toList().get(i)).x,
@@ -162,7 +171,7 @@ public class Utils {
                 newRect = new Rect(newX, newY, newWidth, newHeight); // Новый уменьшенный rect
 
                 label += " " + getTagColor(frame.submat(newRect));
-                // Наносим текст на изображение.
+//                 Наносим текст на изображение.
                 Imgproc.putText(frame, label, textPoint, Imgproc.FONT_HERSHEY_COMPLEX, 1.2, contrastingColor, 2);
                 tags.append(label).append("; ");
             }
@@ -180,7 +189,6 @@ public class Utils {
 
     private static String getTagColor(Mat frame) {
         Scalar meanColor = Core.mean(frame);
-
         return scalarToHex(meanColor);
     }
 
@@ -260,16 +268,15 @@ public class Utils {
     }
 
     // Функция для парсинга файла coco.names.
-    private static List<String> labels(String path) {
+    private static List<String> labels() {
         List<String> labels = new ArrayList<>();
         try {
-            Scanner scnLabels = new Scanner(new File(path));
+            Scanner scnLabels = new Scanner(new File(Utils.path));
             while (scnLabels.hasNext()) {
                 String label = scnLabels.nextLine();
                 labels.add(label);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ignored) {
         }
 
         return labels;
@@ -289,14 +296,30 @@ public class Utils {
     }
 
     // Метод для извлечения наименований выходных слоев.
-    private static List<String> getOutputLayerNames(Net network) {
-        List<String> layersNames = network.getLayerNames();
+    private static List<String> getOutputLayerNames() {
+        List<String> layersNames = Utils.network.getLayerNames();
         List<String> outputLayersNames = new ArrayList<>();
-        List<Integer> unconnectedLayersIndexes = network.getUnconnectedOutLayers().toList();
+        List<Integer> unconnectedLayersIndexes = Utils.network.getUnconnectedOutLayers().toList();
         for (int i : unconnectedLayersIndexes) {
             outputLayersNames.add(layersNames.get(i - 1));
         }
         return outputLayersNames;
     }
 
+    private static void cleanStatic() {
+        File folder = new File(PATH_FOLDER);
+        if (folder.exists() && folder.isDirectory()) {
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isFile()) {
+                        file.delete();
+                    }
+                }
+            }
+        }
+    }
+
+    public static void init() {
+    }
 }
