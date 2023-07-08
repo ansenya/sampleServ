@@ -12,5 +12,4 @@ public class SampleServApplication {
         init();
         SpringApplication.run(SampleServApplication.class, args);
     }
-
 }

@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.senya.sampleserv.models.Model;
-import ru.senya.sampleserv.utils.Utils;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Consumer;
+
 
 import static ru.senya.sampleserv.utils.Utils.*;
 
@@ -33,14 +33,13 @@ public class MainController {
         try {
             Files.copy(file.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
             model = Model.builder()
-                    .regularPath("http://" + SERVER_HOST + "/get/" + uniqueFilename)
+                    .regularPath(uniqueFilename)
                     .build();
             CountDownLatch latch = new CountDownLatch(1);
             model.setLatch(latch);
             processImages(COUNT++, model, latch, path, uniqueFilename);
             latch.await();
-        } catch (IOException | InterruptedException ignored) {
-        }
+        } catch (IOException | InterruptedException ignored) {}
         return ResponseEntity.ok(model);
     }
 

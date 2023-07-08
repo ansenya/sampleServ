@@ -2,6 +2,9 @@ HELP.md
 .gradle
 build/
 /src/main/resources/static/
+/src/main/resources/libs/
+/src/main/config/yolo/yolov4.weights
+/src/main/config/cars_ai/cars.weights
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
