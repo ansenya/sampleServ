@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 @SuppressWarnings("ALL")
 public class Utils {
 
-//    public static final String PATH_FOLDER = "src/main/resources/static/";
+    //    public static final String PATH_FOLDER = "src/main/resources/static/";
     public static final String PATH_FOLDER = "/home/senya/Desktop/imgs/";
     public static String SERVER_IP;
     public static String SERVER_PORT;
@@ -36,14 +36,6 @@ public class Utils {
             network6,
             network7,
             network8,
-            network9,
-            network10,
-            network11,
-            network12,
-            network13,
-            network14,
-            network15,
-            network16,
             car_net;
 
     private static final ReentrantLock lock1 = new ReentrantLock(), lock2 = new ReentrantLock(), lock3 = new ReentrantLock(), lock4 = new ReentrantLock(), lock5 = new ReentrantLock(), lock6 = new ReentrantLock(), lock7 = new ReentrantLock(), lock8 = new ReentrantLock(), lock9 = new ReentrantLock(), lock10 = new ReentrantLock(), lock11 = new ReentrantLock(), lock12 = new ReentrantLock(), lock13 = new ReentrantLock(), lock14 = new ReentrantLock(), lock15 = new ReentrantLock(), lock16 = new ReentrantLock(), lock17 = new ReentrantLock(), lock18 = new ReentrantLock(), lock19 = new ReentrantLock(), lock20 = new ReentrantLock(), lock21 = new ReentrantLock(), lock22 = new ReentrantLock(), lock23 = new ReentrantLock(), lock24 = new ReentrantLock();
@@ -53,16 +45,16 @@ public class Utils {
     private static final Net[] nets;
     public static long COUNT = 0L;
     private static float minProbability = 0.5f, threshold = 0.3f;
-    private static Mat frame1, frame2, frame3, frame4, frame5, frame6, frame7, frame8, frame9, frame10, frame11, frame12, frame13, frame14, frame15, frame16;
-    private static Mat frameResized1, frameResized2, frameResized3, frameResized4, frameResized5, frameResized6, frameResized7, frameResized8, frameResized9, frameResized10, frameResized11, frameResized12, frameResized13, frameResized14, frameResized15, frameResized16;
-    private static Mat additionalFrame1, additionalFrame2, additionalFrame3, additionalFrame4, additionalFrame5, additionalFrame6, additionalFrame7, additionalFrame8, additionalFrame9, additionalFrame10, additionalFrame11, additionalFrame12, additionalFrame13, additionalFrame14, additionalFrame15, additionalFrame16;
-    private static int height1, height2, height3, height4, height5, height6, height7, height8, height9, height10, height11, height12, height13, height14, height15, height16;
-    private static int width1, width2, width3, width4, width5, width6, width7, width8, width9, width10, width11, width12, width13, width14, width15, width16;
-    private static MatOfInt indices1, indices2, indices3, indices4, indices5, indices6, indices7, indices8, indices9, indices10, indices11, indices12, indices13, indices14, indices15, indices16;
-    private static List<String> tags1 = new LinkedList<>(), tags2 = new LinkedList<>(), tags3 = new LinkedList<>(), tags4 = new LinkedList<>(), tags5 = new LinkedList<>(), tags6 = new LinkedList<>(), tags7 = new LinkedList<>(), tags8 = new LinkedList<>(), tags9 = new LinkedList<>(), tags10 = new LinkedList<>(), tags11 = new LinkedList<>(), tags12 = new LinkedList<>(), tags13 = new LinkedList<>(), tags14 = new LinkedList<>(), tags15 = new LinkedList<>(), tags16 = new LinkedList<>();
-    private static Scalar contrastingColor1, contrastingColor2, contrastingColor3, contrastingColor4, contrastingColor5, contrastingColor6, contrastingColor7, contrastingColor8, contrastingColor9, contrastingColor10, contrastingColor11, contrastingColor12, contrastingColor13, contrastingColor14, contrastingColor15, contrastingColor16;
-    private static String aiPath1, aiPath2, aiPath3, aiPath4, aiPath5, aiPath6, aiPath7, aiPath8, aiPath9, aiPath10, aiPath11, aiPath12, aiPath13, aiPath14, aiPath15, aiPath16;
-    private static String coloredPath1, coloredPath2, coloredPath3, coloredPath4, coloredPath5, coloredPath6, coloredPath7, coloredPath8, coloredPath9, coloredPath10, coloredPath11, coloredPath12, coloredPath13, coloredPath14, coloredPath15, coloredPath16;
+    private static Mat frame1, frame2, frame3, frame4, frame5, frame6, frame7, frame8;
+    private static Mat frameResized1, frameResized2, frameResized3, frameResized4, frameResized5, frameResized6, frameResized7, frameResized8;
+    private static Mat additionalFrame1, additionalFrame2, additionalFrame3, additionalFrame4, additionalFrame5, additionalFrame6, additionalFrame7, additionalFrame8;
+    private static int height1, height2, height3, height4, height5, height6, height7, height8;
+    private static int width1, width2, width3, width4, width5, width6, width7, width8;
+    private static MatOfInt indices1, indices2, indices3, indices4, indices5, indices6, indices7, indices8;
+    private static List<String> tags1 = new LinkedList<>(), tags2 = new LinkedList<>(), tags3 = new LinkedList<>(), tags4 = new LinkedList<>(), tags5 = new LinkedList<>(), tags6 = new LinkedList<>(), tags7 = new LinkedList<>(), tags8 = new LinkedList<>();
+    private static Scalar contrastingColor1, contrastingColor2, contrastingColor3, contrastingColor4, contrastingColor5, contrastingColor6, contrastingColor7, contrastingColor8;
+    private static String aiPath1, aiPath2, aiPath3, aiPath4, aiPath5, aiPath6, aiPath7, aiPath8;
+    private static String coloredPath1, coloredPath2, coloredPath3, coloredPath4, coloredPath5, coloredPath6, coloredPath7, coloredPath8;
 
 
     static {
@@ -77,14 +69,6 @@ public class Utils {
         network6 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
         network7 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
         network8 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network9 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network10 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network11 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network12 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network13 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network14 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network15 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network16 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
         car_net = Dnn.readNetFromDarknet("src/main/config/cars_ai/cars.cfg", "src/main/config/cars_ai/cars.weights");
 
         frameResized1 = new Mat();
@@ -95,14 +79,7 @@ public class Utils {
         frameResized6 = new Mat();
         frameResized7 = new Mat();
         frameResized8 = new Mat();
-        frameResized9 = new Mat();
-        frameResized10 = new Mat();
-        frameResized11 = new Mat();
-        frameResized12 = new Mat();
-        frameResized13 = new Mat();
-        frameResized14 = new Mat();
-        frameResized15 = new Mat();
-        frameResized16 = new Mat();
+
 
         indices1 = new MatOfInt();
         indices2 = new MatOfInt();
@@ -112,17 +89,9 @@ public class Utils {
         indices6 = new MatOfInt();
         indices7 = new MatOfInt();
         indices8 = new MatOfInt();
-        indices9 = new MatOfInt();
-        indices10 = new MatOfInt();
-        indices11 = new MatOfInt();
-        indices12 = new MatOfInt();
-        indices13 = new MatOfInt();
-        indices14 = new MatOfInt();
-        indices15 = new MatOfInt();
-        indices16 = new MatOfInt();
 
 
-        nets = new Net[]{network1, network2, network3, network4, network5, network6, network7, network8, network9, network10, network11, network12, network13, network14, network15, network16, car_net};
+        nets = new Net[]{network1, network2, network3, network4, network5, network6, network7, network8, car_net};
 
 
         // Инициализация работы на видеокарте
@@ -229,78 +198,6 @@ public class Utils {
                     lock8.unlock();
                 }
             }).start();
-            case 8 -> new Thread(() -> {
-                lock9.lock();
-                try {
-                    processImage9(model, path, uniqueFilename);
-                    latch.countDown();
-                } finally {
-                    lock9.unlock();
-                }
-            }).start();
-            case 9 -> new Thread(() -> {
-                lock10.lock();
-                try {
-                    processImage10(model, path, uniqueFilename);
-                    latch.countDown();
-                } finally {
-                    lock10.unlock();
-                }
-            }).start();
-            case 10 -> new Thread(() -> {
-                lock11.lock();
-                try {
-                    processImage11(model, path, uniqueFilename);
-                    latch.countDown();
-                } finally {
-                    lock11.unlock();
-                }
-            }).start();
-            case 11 -> new Thread(() -> {
-                lock12.lock();
-                try {
-                    processImage12(model, path, uniqueFilename);
-                    latch.countDown();
-                } finally {
-                    lock12.unlock();
-                }
-            }).start();
-            case 12 -> new Thread(() -> {
-                lock13.lock();
-                try {
-                    processImage13(model, path, uniqueFilename);
-                    latch.countDown();
-                } finally {
-                    lock13.unlock();
-                }
-            }).start();
-            case 13 -> new Thread(() -> {
-                lock14.lock();
-                try {
-                    processImage14(model, path, uniqueFilename);
-                    latch.countDown();
-                } finally {
-                    lock14.unlock();
-                }
-            }).start();
-            case 14 -> new Thread(() -> {
-                lock15.lock();
-                try {
-                    processImage15(model, path, uniqueFilename);
-                    latch.countDown();
-                } finally {
-                    lock15.unlock();
-                }
-            }).start();
-            case 15 -> new Thread(() -> {
-                lock16.lock();
-                try {
-                    processImage16(model, path, uniqueFilename);
-                    latch.countDown();
-                } finally {
-                    lock16.unlock();
-                }
-            }).start();
         }
     }
 
@@ -360,63 +257,6 @@ public class Utils {
         model.setColoredPath("colored_" + fileName);
     }
 
-    public static void processImage9(Model model, String src, String fileName) {
-        model.setHexColor(getColor(src));
-        model.setTags(getTags(src, model.getHexColor(), fileName, nets[8], frame9, frameResized9, additionalFrame9, minProbability, threshold, height9, width9, indices9, tags9, contrastingColor9, aiPath9, coloredPath9));
-        model.setAiPath("ai_" + fileName);
-        model.setColoredPath("colored_" + fileName);
-    }
-
-    public static void processImage10(Model model, String src, String fileName) {
-        model.setHexColor(getColor(src));
-        model.setTags(getTags(src, model.getHexColor(), fileName, nets[9], frame10, frameResized10, additionalFrame10, minProbability, threshold, height10, width10, indices10, tags10, contrastingColor10, aiPath10, coloredPath10));
-        model.setAiPath("ai_" + fileName);
-        model.setColoredPath("colored_" + fileName);
-    }
-
-    public static void processImage11(Model model, String src, String fileName) {
-        model.setHexColor(getColor(src));
-        model.setTags(getTags(src, model.getHexColor(), fileName, nets[10], frame11, frameResized11, additionalFrame11, minProbability, threshold, height11, width11, indices11, tags11, contrastingColor11, aiPath11, coloredPath11));
-        model.setAiPath("ai_" + fileName);
-        model.setColoredPath("colored_" + fileName);
-    }
-
-    public static void processImage12(Model model, String src, String fileName) {
-        model.setHexColor(getColor(src));
-        model.setTags(getTags(src, model.getHexColor(), fileName, nets[11], frame12, frameResized12, additionalFrame12, minProbability, threshold, height12, width12, indices12, tags12, contrastingColor12, aiPath12, coloredPath12));
-        model.setAiPath("ai_" + fileName);
-        model.setColoredPath("colored_" + fileName);
-    }
-
-    public static void processImage13(Model model, String src, String fileName) {
-        model.setHexColor(getColor(src));
-        model.setTags(getTags(src, model.getHexColor(), fileName, nets[12], frame13, frameResized13, additionalFrame13, minProbability, threshold, height13, width13, indices13, tags13, contrastingColor13, aiPath13, coloredPath13));
-        model.setAiPath("ai_" + fileName);
-        model.setColoredPath("colored_" + fileName);
-    }
-
-
-    public static void processImage14(Model model, String src, String fileName) {
-        model.setHexColor(getColor(src));
-        model.setTags(getTags(src, model.getHexColor(), fileName, nets[13], frame14, frameResized14, additionalFrame14, minProbability, threshold, height14, width14, indices14, tags14, contrastingColor14, aiPath14, coloredPath14));
-        model.setAiPath("ai_" + fileName);
-        model.setColoredPath("colored_" + fileName);
-    }
-
-    public static void processImage15(Model model, String src, String fileName) {
-        model.setHexColor(getColor(src));
-        model.setTags(getTags(src, model.getHexColor(), fileName, nets[14], frame15, frameResized15, additionalFrame15, minProbability, threshold, height15, width15, indices15, tags15, contrastingColor15, aiPath15, coloredPath15));
-        model.setAiPath("ai_" + fileName);
-        model.setColoredPath("colored_" + fileName);
-    }
-
-    public static void processImage16(Model model, String src, String fileName) {
-        model.setHexColor(getColor(src));
-        model.setTags(getTags(src, model.getHexColor(), fileName, nets[15], frame16, frameResized16, additionalFrame16, minProbability, threshold, height16, width16, indices16, tags16, contrastingColor16, aiPath16, coloredPath16));
-        model.setAiPath("ai_" + fileName);
-        model.setColoredPath("colored_" + fileName);
-    }
-
 
     @SuppressWarnings("UnusedAssignment")
     private static String[] getTags(String image, String color, String fileName, Net net,
@@ -426,23 +266,7 @@ public class Utils {
                                     MatOfInt indices, List<String> tags,
                                     Scalar contrastingColor, String aiPath, String coloredPath) {
 
-
-//        // Инициализируем переменные.
-//        Mat frame, frameResized = new Mat(), additionalFrame;
-//        float minProbability = 0.5f, threshold = 0.3f;
-//        int height, width;
-//        MatOfInt indices = new MatOfInt();
-//        List<String> tags = new LinkedList<>();
-//        Scalar contrastingColor = getContrastingColor(hexToScalar(getContrastingHex(color)));
-//        String aiPath = "ai_" + fileName, coloredPath = "colored_" + fileName;
-
-        // Инициализируем переменные.
-//        indices = new MatOfInt();
-//        frameResized = new Mat();
-//        tags = new LinkedList<>();
-
         try {
-
             // Освобождение ресурсов для объектов Mat
             frame.release();
             frameResized.release();
@@ -452,7 +276,8 @@ public class Utils {
 
             // Очистка списка tags
             tags.clear();
-        } catch (NullPointerException ignored){}
+        } catch (NullPointerException ignored) {
+        }
 
 
         contrastingColor = getContrastingColor(hexToScalar(getContrastingHex(color)));
@@ -488,30 +313,30 @@ public class Utils {
 
         // Проходим через все предсказания из выходных слоёв по очереди.
         // В цикле проходим через слои:
-//        for (Mat output : outputFromNetwork) {
-//            // Проходимся по всем предсказаниям.
-//            for (int i = 0; i < output.rows(); i++) {
-//                Mat scores = output.row(i).colRange(5, output.cols());
-//                Core.MinMaxLocResult mm = Core.minMaxLoc(scores);
-//                Point classPoint = mm.maxLoc;
-//                double confidence = mm.maxVal;
-//
-//                // Фильтруем предсказания по порогу уверенности.
-//                if (confidence > minProbability) {
-//                    int centerX = (int) (output.row(i).get(0, 0)[0] * width);
-//                    int centerY = (int) (output.row(i).get(0, 1)[0] * height);
-//                    int boxWidth = (int) (output.row(i).get(0, 2)[0] * width);
-//                    int boxHeight = (int) (output.row(i).get(0, 3)[0] * height);
-//                    int left = centerX - boxWidth / 2;
-//                    int top = centerY - boxHeight / 2;
-//
-//                    classIndexes.add((int) classPoint.x);
-//                    confidencesList.add((float) confidence);
-//                    boundingBoxesList.add(new Rect2d(left, top, boxWidth, boxHeight));
-//                }
-//
-//            }
-//        }
+        for (Mat output : outputFromNetwork) {
+            // Проходимся по всем предсказаниям.
+            for (int i = 0; i < output.rows(); i++) {
+                Mat scores = output.row(i).colRange(5, output.cols());
+                Core.MinMaxLocResult mm = Core.minMaxLoc(scores);
+                Point classPoint = mm.maxLoc;
+                double confidence = mm.maxVal;
+
+                // Фильтруем предсказания по порогу уверенности.
+                if (confidence > minProbability) {
+                    int centerX = (int) (output.row(i).get(0, 0)[0] * width);
+                    int centerY = (int) (output.row(i).get(0, 1)[0] * height);
+                    int boxWidth = (int) (output.row(i).get(0, 2)[0] * width);
+                    int boxHeight = (int) (output.row(i).get(0, 3)[0] * height);
+                    int left = centerX - boxWidth / 2;
+                    int top = centerY - boxHeight / 2;
+
+                    classIndexes.add((int) classPoint.x);
+                    confidencesList.add((float) confidence);
+                    boundingBoxesList.add(new Rect2d(left, top, boxWidth, boxHeight));
+                }
+
+            }
+        }
 
         // Применяем алгоритм подавления немаксимумов.
         boundingBoxes.fromList(boundingBoxesList);
@@ -540,7 +365,7 @@ public class Utils {
 
                 // Форматируем строку для нанесения на изображение:
                 // Выявленный клас: вероятность
-                String label = labels.get(classIndex) + " " + String.format("%.3f", confidences.toList().get(i));
+                String label = labels.get(classIndex) + " " + String.format("%.2f", confidences.toList().get(i));
 
                 // Инициализируем точку для нанесения текста.
                 Point textPoint = new Point(
@@ -550,47 +375,21 @@ public class Utils {
 
                 double scaleFactor = 0.4; // Множитель уменьшения
 
-                int newWidth = (int) (rect.width * scaleFactor); // Новая ширина
-                int newHeight = (int) (rect.height * scaleFactor); // Новая высота
+                int newWidth = (int) (rect.width * scaleFactor);
+                int newHeight = (int) (rect.height * scaleFactor);
 
                 // Центрирование новой рамки относительно исходной
                 int newX = rect.x + (rect.width - newWidth) / 2;
                 int newY = rect.y + (rect.height - newHeight) / 2;
 
-                newRect = new Rect(newX, newY, newWidth, newHeight); // Новый уменьшенный rect
+                newRect = new Rect(newX, newY, newWidth, newHeight); // Новый уменьшенный rect (чтобы цвет тега определить)
 
                 label += " " + getTagColor(frame.submat(newRect));
 
-
-//                int x = (int) (boundingList.get(indicesList.get(i)).x);
-//                int y = (int) (boundingList.get(indicesList.get(i)).y);
-//                int w = (int) (boundingList.get(indicesList.get(i)).width);
-//                int h = (int) (boundingList.get(indicesList.get(i)).height);
-//
-//                int centerX = x + (w / 2);
-//                int centerY = y + (h / 2);
-//
-//
-//                String text = getPattern(fileName) + " " + centerX / (float) width + " " + centerY / (float) height + " " + w / (float) width + " " + h / (float) height;
-//                String[] strings = fileName.split(".jpeg");
-//                String filePath = "src/main/resources/static/" + fileName.split(".jpeg")[0] + ".txt";
-//                File file = new File(filePath);
-//                try {
-//                    file.createNewFile();
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//
-//                try (FileWriter writer = new FileWriter(filePath)) {
-//                    writer.write(text);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-
-//                if (label.contains("car")) {
-//                    Mat croppedFrame = new Mat(additionalFrame, rect);
-//                    label = label.replace("car", getCarBrand(car_net, croppedFrame, color));
-//                }
+                if (label.contains("car")) {
+                    Mat croppedFrame = new Mat(additionalFrame, rect);
+                    label = label.replace("car", getCarBrand(car_net, croppedFrame, color));
+                }
 
                 // Наносим ограничительную рамку.
                 Imgproc.rectangle(frame, rect, contrastingColor, 2);
@@ -598,14 +397,15 @@ public class Utils {
                 // Наносим текст на изображение.
                 Imgproc.putText(frame, label, textPoint, Imgproc.FONT_HERSHEY_COMPLEX, 1.2, contrastingColor, 2);
 
+
                 tags.add(label);
             }
         }
 
-//        Imgcodecs.imwrite(PATH_FOLDER + aiPath, frame);
+        Imgcodecs.imwrite(PATH_FOLDER + aiPath, frame);
 
         frame.setTo(hexToScalar(color));
-//        Imgcodecs.imwrite(PATH_FOLDER + "colored_" + fileName, frame);
+        Imgcodecs.imwrite(PATH_FOLDER + "colored_" + fileName, frame);
 
         return tags.toArray(new String[tags.size()]);
     }
