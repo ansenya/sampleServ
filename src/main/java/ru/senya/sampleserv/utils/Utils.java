@@ -20,8 +20,8 @@ import java.util.regex.Pattern;
 @SuppressWarnings("ALL")
 public class Utils {
 
-    //    public static final String PATH_FOLDER = "src/main/resources/static/";
-    public static final String PATH_FOLDER = "/home/senya/Desktop/imgs/";
+        public static final String PATH_FOLDER = "src/main/resources/static/";
+//    public static final String PATH_FOLDER = "/home/senya/Desktop/imgs/";
     public static String SERVER_IP;
     public static String SERVER_PORT;
     public static final String SERVER_HOST = "http://192.168.50.85:8082";
