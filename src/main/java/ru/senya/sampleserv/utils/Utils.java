@@ -20,11 +20,10 @@ import java.util.regex.Pattern;
 @SuppressWarnings("ALL")
 public class Utils {
 
-        public static final String PATH_FOLDER = "src/main/resources/static/";
-//    public static final String PATH_FOLDER = "/home/senya/Desktop/imgs/";
+    public static final String PATH_FOLDER = "src/main/resources/static/";
     public static String SERVER_IP;
     public static String SERVER_PORT;
-    public static final String SERVER_HOST = "http://192.168.50.85:8082";
+    public static final String SERVER_HOST = "http://localhost:8082";
     private static final String path = "src/main/config/yolo/yolov4.names", cfgPath = "src/main/config/yolo/yolov4.cfg", weightsPath = "src/main/config/yolo/yolov4.weights";
     private static final String carPath = "src/main/config/cars_ai/cars.names", carCfgPath = "src/main/config/cars_ai/cars.cfg", carWeightsPath = "src/main/config/cars_ai/cars.weights";
     private static final Net
