@@ -8,7 +8,7 @@
 
 ### Описание
 
-Сервер предоставляет API для демонстрации работы нейронной сети по обработке изображений. Для использования его функциональности необходимо установить и запустить сервер, настроить библиотеку OpenCV и скачать веса модели YOLOV4.    
+Сервер предоставляет API для демонстрации работы нейронной сети по обработке изображений. В данный момент определяется 80 тегов, которые уже умеет определять yolov4, а так же определяются марки машин (не все). Для использования функциональности сервера его необходимо установить и запустить, настроить библиотеку OpenCV и скачать веса модели YOLOV4 и модели cars.weights (кастомные).    
 
 ### Методы
 
@@ -38,11 +38,12 @@
 1. Установите и настройте окружение для запуска сервера, включая установку Java и Gradle. Либо скачайте IntelijiIDEA.
 2. Склонируйте репозиторий сервера: `git clone https://github.com/ansenya/sampleServ.git`
 3. Перейдите в каталог проекта sampleServ.
-4. Скачайте [yolov4.weighs](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights) в папку `src/main/config`.
-5. Добавьте (или скачайте) [opencv-470.jar](https://drive.google.com/file/d/1NtxUHgiKtgyNM9bgBkAnuL8RbbN-XKz9/view?usp=sharing) в папку `src/main/resources/libs`.
-6. Добавьте в конфигурацию `opencv-470.jar` в **project_structure** (если вы используете IntelijiIDEA) файл нативной библиотеки [libopencv_java470.so](https://drive.google.com/file/d/1wfKi149eeDpARoXjrKdwEXBng0eddxlF/view?usp=sharing).  
+4. Скачайте [yolov4.weighs](https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights) в папку `src/main/config/yolo/`.
+5. Скачайте [cars.weighs](https://drive.google.com/file/d/1-6RtxihcV4A8MhRjG4QS4xvJpIE75axD/view?usp=drive_link) в папку `src/main/config/cars_ai/`.
+6. Добавьте (или скачайте) [opencv-470.jar](https://drive.google.com/file/d/1NtxUHgiKtgyNM9bgBkAnuL8RbbN-XKz9/view?usp=sharing) в папку `src/main/resources/libs`.
+7. Добавьте в конфигурацию `opencv-470.jar` в **project_structure** (если вы используете IntelijiIDEA) файл нативной библиотеки [libopencv_java470.so](https://drive.google.com/file/d/1wfKi149eeDpARoXjrKdwEXBng0eddxlF/view?usp=sharing).  
 [`туториал`](https://drive.google.com/file/d/1mt4dAaLLfO7xRpDLP4znJf3hfKq-eJ4n/view?usp=sharing).
-7. Запустите сервер. Сервер будет запущен на порту 8082.
+8. Запустите сервер. Сервер будет запущен на порту 8082.
   
 Теперь вы можете отправить POST-запрос на http://localhost:8082/process, указав файл изображения в теле запроса с именем `file`. Получите ответ с результатами обработки изображения.
 
