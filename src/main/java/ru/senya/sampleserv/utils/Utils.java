@@ -21,6 +21,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.opencv.dnn.Dnn.readNetFromDarknet;
+
 @SuppressWarnings("ALL")
 @Service
 public class Utils {
@@ -29,10 +31,10 @@ public class Utils {
     public static String SERVER_IP;
     public static String SERVER_PORT;
     public static final String SERVER_HOST = "http://localhost:8082";
-    //    private final String path = "src/main/config/yolo/yolov4.names", cfgPath = "src/main/config/yolo/yolov4.cfg", weightsPath = "src/main/config/yolo/yolov4.weights";
-    private final String path = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/9k.names",
-            cfgPath = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/yolo9000.cfg",
-            weightsPath = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/yolo9000.weights";
+        private final String path = "src/main/config/yolo/yolov4.names", cfgPath = "src/main/config/yolo/yolov4.cfg", weightsPath = "src/main/config/yolo/yolov4.weights";
+//    private final String path = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/9k.names",
+//            cfgPath = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/yolo9000.cfg",
+//            weightsPath = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/yolo9000.weights";
     private final String carPath = "src/main/config/cars_ai/cars.names", carCfgPath = "src/main/config/cars_ai/cars.cfg", carWeightsPath = "src/main/config/cars_ai/cars.weights";
     private final Net
             network1,
@@ -57,15 +59,15 @@ public class Utils {
     @Autowired
     public Utils(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
-        network1 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        System.out.println(network1.getLayerNames());
-        network2 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network3 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network4 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network5 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network6 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network7 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        network8 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+
+        network1 = readNetFromDarknet(cfgPath, weightsPath);
+        network2 = readNetFromDarknet(cfgPath, weightsPath);
+        network3 = readNetFromDarknet(cfgPath, weightsPath);
+        network4 = readNetFromDarknet(cfgPath, weightsPath);
+        network5 = readNetFromDarknet(cfgPath, weightsPath);
+        network6 = readNetFromDarknet(cfgPath, weightsPath);
+        network7 = readNetFromDarknet(cfgPath, weightsPath);
+        network8 = readNetFromDarknet(cfgPath, weightsPath);
 
 
         nets = new Net[]{network1, network2, network3, network4, network5, network6, network7, network8};
@@ -125,7 +127,6 @@ public class Utils {
 
     @SuppressWarnings("UnusedAssignment")
     private String[] processWithYolo(String pathToImage, Model model, int index) {
-
         // Инициализируем переменные.
         Mat frame, frameResized = new Mat(), additionalFrame;
         MatOfInt indices = new MatOfInt();
@@ -164,7 +165,8 @@ public class Utils {
         Imgproc.resize(frame, frameResized, new Size(resizedWidth, resizedHeight), 0, 0, Imgproc.INTER_LINEAR);
 
         // Подаём blob на вход нейронной сети.
-        net.setInput(Dnn.blobFromImage(frameResized, 1 / 255.0));
+        Mat blob = Dnn.blobFromImage(frameResized, 1 / 255.0);
+        net.setInput(blob);
 
         // Извлекаем данные с выходных слоев нейронной сети.
         List<Mat> outputFromNetwork = new ArrayList<>();
@@ -275,6 +277,7 @@ public class Utils {
         frameResized.release();
         additionalFrame.release();
         indices.release();
+        blob.release();
 
         System.gc();
 
