@@ -6,8 +6,10 @@ import org.opencv.dnn.Dnn;
 import org.opencv.dnn.Net;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.springframework.aop.scope.ScopedProxyUtils;
-import org.springframework.core.task.support.ExecutorServiceAdapter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 import ru.senya.sampleserv.models.Model;
 
 import java.io.File;
@@ -15,22 +17,24 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @SuppressWarnings("ALL")
+@Service
 public class Utils {
 
     public static final String PATH_FOLDER = "src/main/resources/static/";
     public static String SERVER_IP;
     public static String SERVER_PORT;
     public static final String SERVER_HOST = "http://localhost:8082";
-    private static final String path = "src/main/config/yolo/yolov4.names", cfgPath = "src/main/config/yolo/yolov4.cfg", weightsPath = "src/main/config/yolo/yolov4.weights";
-    private static final String carPath = "src/main/config/cars_ai/cars.names", carCfgPath = "src/main/config/cars_ai/cars.cfg", carWeightsPath = "src/main/config/cars_ai/cars.weights";
-    private static final Net
+    //    private final String path = "src/main/config/yolo/yolov4.names", cfgPath = "src/main/config/yolo/yolov4.cfg", weightsPath = "src/main/config/yolo/yolov4.weights";
+    private final String path = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/9k.names",
+            cfgPath = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/yolo9000.cfg",
+            weightsPath = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/yolo9000.weights";
+    private final String carPath = "src/main/config/cars_ai/cars.names", carCfgPath = "src/main/config/cars_ai/cars.cfg", carWeightsPath = "src/main/config/cars_ai/cars.weights";
+    private final Net
             network1,
             network2,
             network3,
@@ -38,26 +42,23 @@ public class Utils {
             network5,
             network6,
             network7,
-            network8,
-            car_net,
-            car_net2;
+            network8;
 
-    private static final ReentrantLock lock1 = new ReentrantLock(), lock2 = new ReentrantLock(), lock3 = new ReentrantLock(), lock4 = new ReentrantLock(), lock5 = new ReentrantLock(), lock6 = new ReentrantLock(), lock7 = new ReentrantLock(), lock8 = new ReentrantLock(), lock9 = new ReentrantLock(), lock10 = new ReentrantLock(), lock11 = new ReentrantLock(), lock12 = new ReentrantLock(), lock13 = new ReentrantLock(), lock14 = new ReentrantLock(), lock15 = new ReentrantLock(), lock16 = new ReentrantLock(), lock17 = new ReentrantLock(), lock18 = new ReentrantLock(), lock19 = new ReentrantLock(), lock20 = new ReentrantLock(), lock21 = new ReentrantLock(), lock22 = new ReentrantLock(), lock23 = new ReentrantLock(), lock24 = new ReentrantLock();
-    private static final List<String> labels, carLabels, outputLayersNames;
-    private static final int amountOfClasses, amountOfOutputLayers;
-    private static final MatOfInt outputLayersIndexes;
-    private static final Net[] nets;
+    private final ReentrantLock lock1 = new ReentrantLock(), lock2 = new ReentrantLock(), lock3 = new ReentrantLock(), lock4 = new ReentrantLock(), lock5 = new ReentrantLock(), lock6 = new ReentrantLock(), lock7 = new ReentrantLock(), lock8 = new ReentrantLock(), lock9 = new ReentrantLock(), lock10 = new ReentrantLock(), lock11 = new ReentrantLock(), lock12 = new ReentrantLock(), lock13 = new ReentrantLock(), lock14 = new ReentrantLock(), lock15 = new ReentrantLock(), lock16 = new ReentrantLock(), lock17 = new ReentrantLock(), lock18 = new ReentrantLock(), lock19 = new ReentrantLock(), lock20 = new ReentrantLock(), lock21 = new ReentrantLock(), lock22 = new ReentrantLock(), lock23 = new ReentrantLock(), lock24 = new ReentrantLock();
+    private final List<String> labels;
+    private final int amountOfClasses;
+    //    amountOfOutputLayers;
+//    private final MatOfInt outputLayersIndexes;
+    private final Net[] nets;
     public static long COUNT = 0L, c2 = 0L;
-    private static final Net[] car_nets;
-    private static ExecutorService executor = Executors.newFixedThreadPool(8);
+    //    private ExecutorService taskExecutor = Executors.newFixedThreadPool(8);
+    private TaskExecutor taskExecutor;
 
-
-    static {
-
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        System.out.print("OpenCV version: " + Core.VERSION);
-
+    @Autowired
+    public Utils(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
         network1 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        System.out.println(network1.getLayerNames());
         network2 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
         network3 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
         network4 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
@@ -65,12 +66,9 @@ public class Utils {
         network6 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
         network7 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
         network8 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
-        car_net = Dnn.readNetFromDarknet("src/main/config/cars_ai/cars.cfg", "src/main/config/cars_ai/cars.weights");
-        car_net2 = Dnn.readNetFromDarknet("src/main/config/cars_ai/cars.cfg", "src/main/config/cars_ai/cars.weights");
 
 
         nets = new Net[]{network1, network2, network3, network4, network5, network6, network7, network8};
-        car_nets = new Net[]{car_net, car_net2};
 
 
         // Инициализация работы на видеокарте
@@ -86,148 +84,59 @@ public class Utils {
             }
         }
 
-        car_net.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
-        car_net.setPreferableTarget(Dnn.DNN_TARGET_CUDA_FP16);
-
-        car_net2.setPreferableBackend(Dnn.DNN_BACKEND_CUDA);
-        car_net2.setPreferableTarget(Dnn.DNN_TARGET_CUDA_FP16);
-
-
         // Классы
         labels = labels(path);
-        carLabels = labels(carPath);
+        //carLabels = labels(carPath);
         amountOfClasses = labels.size();
 
         // Извлекаем наименования выходных слоев.
-        outputLayersNames = getOutputLayerNames(nets[0]);
+//        outputLayersNames = getOutputLayerNames(nets[0]);
 
         // Извлекаем индексы выходных слоев.
-        outputLayersIndexes = nets[0].getUnconnectedOutLayers();
-        amountOfOutputLayers = outputLayersIndexes.toArray().length;
+//        outputLayersIndexes = nets[0].getUnconnectedOutLayers();
+//        amountOfOutputLayers = outputLayersIndexes.toArray().length;
+    }
 
+
+    static {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        System.out.print("OpenCV version: " + Core.VERSION);
         cleanStatic();
     }
 
 
-    public static void processImages(long COUNT, Model model, CountDownLatch latch, String path, String uniqueFilename) {
-        int i = (int) (COUNT % (nets.length - 1));
-        switch (i) {
-            case 0:
-                executor.execute(() -> {
-                    lock1.lock();
-                    try {
-                        processImage(model, i, uniqueFilename);
-                        latch.countDown();
-                    } finally {
-                        lock1.unlock();
-                    }
-                });
-                break;
-            case 1:
-                executor.execute(()-> {
-                    lock2.lock();
-                    try {
-                        processImage(model, i, uniqueFilename);
-                        latch.countDown();
-                    } finally {
-                        lock2.unlock();
-                    }
-                });
-                break;
-            case 2:
-                executor.execute(()-> {
-                    lock3.lock();
-                    try {
-                        processImage(model, i, uniqueFilename);
-                        latch.countDown();
-                    } finally {
-                        lock3.unlock();
-                    }
-                });
-                break;
-            case 3:
-                executor.execute(()-> {
-                    lock4.lock();
-                    try {
-                        processImage(model, i, uniqueFilename);
-                        latch.countDown();
-                    } finally {
-                        lock4.unlock();
-                    }
-                });
-                break;
-            case 4:
-                executor.execute(()-> {
-                    lock5.lock();
-                    try {
-                        processImage(model, i, uniqueFilename);
-                        latch.countDown();
-                    } finally {
-                        lock5.unlock();
-                    }
-                });
-                break;
-            case 5:
-                executor.execute(()-> {
-                    lock6.lock();
-                    try {
-                        processImage(model, i, uniqueFilename);
-                        latch.countDown();
-                    } finally {
-                        lock6.unlock();
-                    }
-                });
-                break;
-            case 6:
-                executor.execute(()-> {
-                    lock7.lock();
-                    try {
-                        processImage(model, i, uniqueFilename);
-                        latch.countDown();
-                    } finally {
-                        lock7.unlock();
-                    }
-                });
-                break;
-            case 7:
-                executor.execute(()-> {
-                    lock8.lock();
-                    try {
-                        processImage(model, i, uniqueFilename);
-                        latch.countDown();
-                    } finally {
-                        lock8.unlock();
-                    }
-                });
-                break;
-            default:
-                // Обработка для остальных случаев
-                break;
-        }
-
+    public void processImages(Model model, CountDownLatch latch, String path, String uniqueFilename) {
+        int i = (int) (COUNT++ % (nets.length));
+        taskExecutor.execute(() -> {
+            processImage(model, i, uniqueFilename);
+            latch.countDown();
+        });
     }
 
-    private static void processImage(Model model, int index, String filename) {
+    @Async
+    private void processImage(Model model, int index, String filename) {
         String path = PATH_FOLDER + filename;
         model.setHexColor(getColor(path));
-        model.setTags(processWithYolo(path, model, nets[index]));
+        model.setTags(processWithYolo(path, model, index));
         model.setAiPath("ai_" + filename);
         model.setColoredPath("colored_" + filename);
+
     }
 
-
     @SuppressWarnings("UnusedAssignment")
-    private static String[] processWithYolo(String pathToImage, Model model, Net net) {
+    private String[] processWithYolo(String pathToImage, Model model, int index) {
 
         // Инициализируем переменные.
         Mat frame, frameResized = new Mat(), additionalFrame;
+        MatOfInt indices = new MatOfInt();
         float minProbability = 0.5f, threshold = 0.3f;
         int height, width;
-        MatOfInt indices = new MatOfInt();
         String color = model.getHexColor();
         Scalar contrastingColor = getContrastingColor(hexToScalar(getContrastingHex(color)));
         String aiPath, coloredPath, fileName;
         List<String> tags = new LinkedList<>();
+        Net net = nets[index];
+
 
         fileName = pathToImage.split("/")[4];
 
@@ -247,21 +156,24 @@ public class Utils {
         int resizedWidth = 32 * (height / 32);
         int k = 64;
 
-        while (resizedHeight * resizedWidth > 105_000) {
+        while (resizedHeight * resizedWidth > 280_000) {
             resizedWidth = 32 * (resizedWidth / k);
             resizedHeight = 32 * (resizedHeight / k);
         }
 
         Imgproc.resize(frame, frameResized, new Size(resizedWidth, resizedHeight), 0, 0, Imgproc.INTER_LINEAR);
 
-
         // Подаём blob на вход нейронной сети.
         net.setInput(Dnn.blobFromImage(frameResized, 1 / 255.0));
 
         // Извлекаем данные с выходных слоев нейронной сети.
         List<Mat> outputFromNetwork = new ArrayList<>();
-        net.forward(outputFromNetwork, outputLayersNames);
+        List<String> outputLayersNames = new ArrayList<>();
 
+        // Извлекаем наименования выходных слоев.
+        outputLayersNames = getOutputLayerNames(net);
+
+        net.forward(outputFromNetwork, outputLayersNames);
 
         // Обнаруживаем объекты на изображении.
         List<Integer> classIndexes = new ArrayList<>();
@@ -270,11 +182,12 @@ public class Utils {
         MatOfFloat confidences = new MatOfFloat();
 
         List<Rect2d> boundingBoxesList = new ArrayList<>();
+
         MatOfRect2d boundingBoxes = new MatOfRect2d();
 
         // Проходим через все предсказания из выходных слоёв по очереди.
         // В цикле проходим через слои:
-        outputFromNetwork.parallelStream().forEach(output -> {
+        outputFromNetwork.forEach(output -> {
             for (int i = 0; i < output.rows(); i++) {
                 Mat scores = output.row(i).colRange(5, output.cols());
                 Core.MinMaxLocResult mm = Core.minMaxLoc(scores);
@@ -337,10 +250,10 @@ public class Utils {
 
                 label += " " + getTagColor(frame.submat(getSmallRect(rect, 0.4f)));
 
-                if (label.contains("car")) {
-                    Mat croppedFrame = new Mat(additionalFrame, rect);
-                    label = label.replace("car", getCarBrand(car_nets[(int) (c2%2)], croppedFrame, color));
-                }
+//                if (label.contains("car")) {
+//                    Mat croppedFrame = new Mat(additionalFrame, rect);
+//                    label = label.replace("car", getCarBrand(car_nets[index], croppedFrame, color));
+//                }
 
                 // Наносим ограничительную рамку.
                 Imgproc.rectangle(frame, rect, contrastingColor, 2);
@@ -363,10 +276,12 @@ public class Utils {
         additionalFrame.release();
         indices.release();
 
+        System.gc();
+
         return tags.toArray(new String[tags.size()]);
     }
 
-    private static synchronized String getCarBrand(Net net, Mat frame, String color) {
+    private String getCarBrand(Net net, Mat frame, String color) {
 
         // Инициализируем переменные.
         Mat frameResized = new Mat(), gray;
@@ -398,6 +313,7 @@ public class Utils {
 
         // Извлекаем данные с выходных слоев нейронной сети.
         List<Mat> outputFromNetwork = new ArrayList<>();
+        List<String> outputLayersNames = new ArrayList<>();
         net.forward(outputFromNetwork, outputLayersNames);
 
         // Обнаруживаем объекты на изображении.
@@ -445,14 +361,14 @@ public class Utils {
         if (indices.size().height > 0) {
             List<Integer> indicesList = indices.toList();
             int classIndex = classIndexes.get(indices.toList().get(0));
-            String label = carLabels.get(classIndex);
-            tag = label;
+            //String label = carLabels.get(classIndex);
+            //tag = label;
         }
 
         return tag.isEmpty() ? "car" : tag;
     }
 
-    private static Rect getSmallRect(Rect rect, double scaleFactor) {
+    private Rect getSmallRect(Rect rect, double scaleFactor) {
         int newWidth = (int) (rect.width * scaleFactor);
         int newHeight = (int) (rect.height * scaleFactor);
 
@@ -463,7 +379,8 @@ public class Utils {
         return new Rect(newX, newY, newWidth, newHeight); // Новый уменьшенный rect (чтобы цвет тега определить)
     }
 
-    private static Rect checkRect(Rect rect, Mat frame) {
+    @Async
+    private Rect checkRect(Rect rect, Mat frame) {
         int frameWidth = frame.width();
         int frameHeight = frame.height();
 
@@ -478,24 +395,24 @@ public class Utils {
     }
 
 
-    private static String getPattern(String str) {
+    private String getPattern(String str) {
         Pattern pattern = Pattern.compile("\\{([^}]*)\\}");
         Matcher matcher = pattern.matcher(str);
         return matcher.find() ? matcher.group(1) : "";
     }
 
-    private static String getTagColor(Mat frame) {
+    private String getTagColor(Mat frame) {
         Scalar meanColor = Core.mean(frame);
         return scalarToHex(meanColor);
     }
 
-    private static String getColor(String path) {
+    private String getColor(String path) {
         Mat image = Imgcodecs.imread(path);
         Scalar meanColor = Core.mean(image);
         return scalarToHex(meanColor);
     }
 
-    private static String scalarToHex(Scalar scalar) {
+    private String scalarToHex(Scalar scalar) {
         // Получение среднего цвета в формате BGR
         double blue = scalar.val[0];
         double green = scalar.val[1];
@@ -504,7 +421,7 @@ public class Utils {
         return String.format("#%02X%02X%02X", (int) red, (int) green, (int) blue);
     }
 
-    private static Scalar hexToScalar(String hexColor) {
+    private Scalar hexToScalar(String hexColor) {
         // Извлечение компонентов цвета из HEX-кода
         int red = Integer.parseInt(hexColor.substring(1, 3), 16);
         int green = Integer.parseInt(hexColor.substring(3, 5), 16);
@@ -513,7 +430,7 @@ public class Utils {
         return new Scalar(blue, green, red);
     }
 
-    private static Scalar getContrastingColor(Scalar rgbColor) {
+    private Scalar getContrastingColor(Scalar rgbColor) {
         // Преобразование цвета из RGB в HSV
         Mat rgbMat = new Mat(1, 1, CvType.CV_8UC3, rgbColor);
         Mat hsvMat = new Mat();
@@ -539,7 +456,7 @@ public class Utils {
         return new Scalar(oppositeRgbValues[2], oppositeRgbValues[1], oppositeRgbValues[0]);
     }
 
-    private static String getContrastingHex(String hexColor) {
+    private String getContrastingHex(String hexColor) {
         // Извлечение компонентов цвета из HEX-кода
         int red = Integer.parseInt(hexColor.substring(1, 3), 16);
         int green = Integer.parseInt(hexColor.substring(3, 5), 16);
@@ -560,7 +477,7 @@ public class Utils {
     }
 
     // Функция для парсинга файла yolov4.names.
-    private static List<String> labels(String path) {
+    private List<String> labels(String path) {
         List<String> labels = new ArrayList<>();
         try {
             Scanner scnLabels = new Scanner(new File(path));
@@ -575,7 +492,7 @@ public class Utils {
     }
 
     // Функция для генерации цветов
-    private static Scalar[] generateColors(int amountOfClasses) {
+    private Scalar[] generateColors(int amountOfClasses) {
         Scalar[] colors = new Scalar[amountOfClasses];
         Random random = new Random();
         for (int i = 0; i < amountOfClasses; i++) {
@@ -588,7 +505,7 @@ public class Utils {
     }
 
     // Метод для извлечения наименований выходных слоев.
-    private static List<String> getOutputLayerNames(Net network) {
+    private List<String> getOutputLayerNames(Net network) {
         List<String> layersNames = network.getLayerNames();
         List<String> outputLayersNames = new ArrayList<>();
         List<Integer> unconnectedLayersIndexes = network.getUnconnectedOutLayers().toList();
@@ -614,6 +531,7 @@ public class Utils {
     }
 
     public static void init() {
+
         // очень важная функция для инициализация static
     }
 }
