@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 import ru.senya.sampleserv.models.Model;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -21,7 +21,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.opencv.dnn.Dnn.readNetFromDarknet;
 
 @SuppressWarnings("ALL")
 @Service
@@ -30,12 +29,11 @@ public class Utils {
     public static final String PATH_FOLDER = "src/main/resources/static/";
     public static String SERVER_IP;
     public static String SERVER_PORT;
-    public static final String SERVER_HOST = "http://localhost:8082";
-        private final String path = "src/main/config/yolo/yolov4.names", cfgPath = "src/main/config/yolo/yolov4.cfg", weightsPath = "src/main/config/yolo/yolov4.weights";
-//    private final String path = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/9k.names",
-//            cfgPath = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/yolo9000.cfg",
-//            weightsPath = "/home/senya/IdeaProjects/sampleServ/src/main/config/yolo9000/yolo9000.weights";
-    private final String carPath = "src/main/config/cars_ai/cars.names", carCfgPath = "src/main/config/cars_ai/cars.cfg", carWeightsPath = "src/main/config/cars_ai/cars.weights";
+    public static final String SERVER_HOST = "http://192.168.1.110:8082";
+    private final String path = "src/main/config/yolo/yolov4.names", cfgPath = "src/main/config/yolo/yolov4.cfg", weightsPath = "src/main/config/yolo/yolov4.weights";
+    //    private final String path = "src/main/config/darknet19/imagenet.shortnames.list", cfgPath = "src/main/config/darknet19/darknet19.cfg", weightsPath = "src/main/config/darknet19/darknet19.weights";
+//    private final String path = "src/main/config/yolo9000/9k.names", cfgPath = "src/main/config/yolo9000/yolo9000.cfg", weightsPath = "src/main/config/yolo9000/yolo9000.weights";
+//    private final String carPath = "src/main/config/cars_ai/cars.names", carCfgPath = "src/main/config/cars_ai/cars.cfg", carWeightsPath = "src/main/config/cars_ai/cars.weights";
     private final Net
             network1,
             network2,
@@ -60,14 +58,14 @@ public class Utils {
     public Utils(TaskExecutor taskExecutor) {
         this.taskExecutor = taskExecutor;
 
-        network1 = readNetFromDarknet(cfgPath, weightsPath);
-        network2 = readNetFromDarknet(cfgPath, weightsPath);
-        network3 = readNetFromDarknet(cfgPath, weightsPath);
-        network4 = readNetFromDarknet(cfgPath, weightsPath);
-        network5 = readNetFromDarknet(cfgPath, weightsPath);
-        network6 = readNetFromDarknet(cfgPath, weightsPath);
-        network7 = readNetFromDarknet(cfgPath, weightsPath);
-        network8 = readNetFromDarknet(cfgPath, weightsPath);
+        network1 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network2 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network3 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network4 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network5 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network6 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network7 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
+        network8 = Dnn.readNetFromDarknet(cfgPath, weightsPath);
 
 
         nets = new Net[]{network1, network2, network3, network4, network5, network6, network7, network8};
@@ -103,7 +101,7 @@ public class Utils {
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         System.out.print("OpenCV version: " + Core.VERSION);
-        cleanStatic();
+//        cleanStatic();
     }
 
 
@@ -115,6 +113,17 @@ public class Utils {
         });
     }
 
+    public void processImages2(Model model, CountDownLatch latch, String path, String uniqueFilename) {
+        int i = (int) (COUNT++ % (nets.length));
+        taskExecutor.execute(() -> {
+            model.setHexColor(getColor(path));
+            model.setAiPath("ai_" + uniqueFilename);
+            model.setColoredPath("colored_" + uniqueFilename);
+            model.setTags(processWithCmd(path, model, uniqueFilename));
+            latch.countDown();
+        });
+    }
+
     @Async
     private void processImage(Model model, int index, String filename) {
         String path = PATH_FOLDER + filename;
@@ -122,7 +131,6 @@ public class Utils {
         model.setTags(processWithYolo(path, model, index));
         model.setAiPath("ai_" + filename);
         model.setColoredPath("colored_" + filename);
-
     }
 
     @SuppressWarnings("UnusedAssignment")
@@ -130,7 +138,7 @@ public class Utils {
         // Инициализируем переменные.
         Mat frame, frameResized = new Mat(), additionalFrame;
         MatOfInt indices = new MatOfInt();
-        float minProbability = 0.5f, threshold = 0.3f;
+        float minProbability = 0.3f, threshold = 0.3f;
         int height, width;
         String color = model.getHexColor();
         Scalar contrastingColor = getContrastingColor(hexToScalar(getContrastingHex(color)));
@@ -157,7 +165,7 @@ public class Utils {
         int resizedWidth = 32 * (height / 32);
         int k = 64;
 
-        while (resizedHeight * resizedWidth > 280_000) {
+        while (resizedHeight * resizedWidth > 500_000) {
             resizedWidth = 32 * (resizedWidth / k);
             resizedHeight = 32 * (resizedHeight / k);
         }
@@ -189,7 +197,7 @@ public class Utils {
 
         // Проходим через все предсказания из выходных слоёв по очереди.
         // В цикле проходим через слои:
-        outputFromNetwork.forEach(output -> {
+        outputFromNetwork.parallelStream().forEach(output -> {
             for (int i = 0; i < output.rows(); i++) {
                 Mat scores = output.row(i).colRange(5, output.cols());
                 Core.MinMaxLocResult mm = Core.minMaxLoc(scores);
@@ -282,6 +290,81 @@ public class Utils {
         System.gc();
 
         return tags.toArray(new String[tags.size()]);
+    }
+
+    private String[] processWithCmd(String path, Model model, String filename) {
+        String darknetPath = "/home/senya/projects/yolo_train/darknet/darknet";
+
+//        String configPath = "src/main/config/yolo/yolov4.cfg";
+//        String weightsPath = "src/main/config/yolo/yolov4.weights";
+        String configPath = "src/main/config/yolo9000/yolo9000.cfg";
+        String weightsPath = "src/main/config/yolo9000/yolo9000.weights";
+
+        Scalar contrastingColor = getContrastingColor(hexToScalar(getContrastingHex(model.getHexColor())));
+
+
+        String[] command = {
+                darknetPath,
+                "detector",
+                "test",
+                "/home/senya/projects/yolo_train/darknet/cfg/combine9k.data",
+//                "src/main/config/yolo/coco.data",
+                configPath,
+                weightsPath,
+                "-dont_show",
+                "-ext_output",
+                path
+        };
+
+        ArrayList<String> labels = new ArrayList<>();
+
+        try {
+            Process process = new ProcessBuilder(command).start();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+            String line;
+            while (true) {
+                Mat image = Imgcodecs.imread(path);
+                line = reader.readLine();
+                if (line == null) break;
+                if (line.contains("%")) {
+                    line = line.replaceAll("\\s", "");
+                    String[] strings = getPattern(line);
+                    double confidence = Integer.parseInt(strings[1]) / 100.0;
+                    if (confidence > 0.5) {
+                        String tag = strings[0];
+                        labels.add(tag + ": " + confidence);
+
+                        int x = Integer.parseInt(strings[2]);
+                        int y = Integer.parseInt(strings[3]);
+                        int width = Integer.parseInt(strings[4]);
+                        int height = Integer.parseInt(strings[5]);
+
+//                         Ограничительная рамка
+                        Rect rect = new Rect(
+                                Math.abs(x), // не знаю почему, но иногда координата может быть отрицательной, и тогда код ломается
+                                Math.abs(y),
+                                (int) width,
+                                (int) height
+                        );
+
+
+                        Imgproc.rectangle(image, rect, contrastingColor);
+
+                    }
+                }
+                Imgcodecs.imwrite(PATH_FOLDER + "ai_" + filename, image);
+            }
+
+            return labels.toArray(new String[labels.size()]);
+//            int exitCode = process.waitFor();
+//            System.out.println("Darknet process exited with code: " + exitCode);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private String getCarBrand(Net net, Mat frame, String color) {
@@ -398,10 +481,15 @@ public class Utils {
     }
 
 
-    private String getPattern(String str) {
-        Pattern pattern = Pattern.compile("\\{([^}]*)\\}");
-        Matcher matcher = pattern.matcher(str);
-        return matcher.find() ? matcher.group(1) : "";
+    private String[] getPattern(String s) {
+        s = s.replace("left_x", "");
+        s = s.replace("top_y", "");
+        s = s.replace("width", "");
+        s = s.replace("height", "");
+        s = s.replace("(", "");
+        s = s.replace(")", "");
+        s = s.replace("%", "");
+        return s.split(":");
     }
 
     private String getTagColor(Mat frame) {

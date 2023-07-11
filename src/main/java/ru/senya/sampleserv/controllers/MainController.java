@@ -3,6 +3,7 @@ package ru.senya.sampleserv.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +51,14 @@ public class MainController {
             latch.await();
         } catch (IOException | InterruptedException ignored) {
         }
-        return ResponseEntity.ok(model);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Access-Control-Allow-Origin", "*");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(model);
     }
 
     @GetMapping(value = "/get/{imageName:.+}", produces = MediaType.IMAGE_JPEG_VALUE)
@@ -64,5 +72,27 @@ public class MainController {
                 .aiPath("asd")
                 .regularPath("123")
                 .build();
+    }
+
+    @PostMapping("/process2")
+    public ResponseEntity<?> process2(@RequestParam(value = "file", required = false) MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.badRequest().body("file is empty");
+        }
+        Model model = null;
+        String uniqueFilename = UUID.randomUUID() + ".jpeg";
+        String path = PATH_FOLDER + uniqueFilename;
+        try {
+            Files.copy(file.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
+            model = Model.builder()
+                    .regularPath(uniqueFilename)
+                    .build();
+            CountDownLatch latch = new CountDownLatch(1);
+            model.setLatch(latch);
+            utils.processImages2(model, latch, path, uniqueFilename);
+            latch.await();
+        } catch (IOException | InterruptedException ignored) {
+        }
+        return ResponseEntity.ok(model);
     }
 }
