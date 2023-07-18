@@ -32,34 +32,34 @@ public class MainController {
         this.utils = utils;
     }
 
-    @PostMapping("/process")
-    public ResponseEntity<?> process(@RequestParam(value = "file", required = false) MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            return ResponseEntity.badRequest().body("file is empty");
-        }
-        Model model = null;
-        String uniqueFilename = UUID.randomUUID() + ".jpeg";
-        String path = PATH_FOLDER + uniqueFilename;
-        try {
-            Files.copy(file.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
-            model = Model.builder()
-                    .regularPath(uniqueFilename)
-                    .build();
-            CountDownLatch latch = new CountDownLatch(1);
-            model.setLatch(latch);
-            utils.processImages(model, latch, path, uniqueFilename);
-            latch.await();
-        } catch (IOException | InterruptedException ignored) {
-        }
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Access-Control-Allow-Origin", "*");
-
-        return ResponseEntity
-                .ok()
-                .headers(headers)
-                .body(model);
-    }
+//    @PostMapping("/process")
+//    public ResponseEntity<?> process(@RequestParam(value = "file", required = false) MultipartFile file) {
+//        if (file == null || file.isEmpty()) {
+//            return ResponseEntity.badRequest().body("file is empty");
+//        }
+//        Model model = null;
+//        String uniqueFilename = UUID.randomUUID() + ".jpeg";
+//        String path = PATH_FOLDER + uniqueFilename;
+//        try {
+//            Files.copy(file.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
+//            model = Model.builder()
+//                    .regularPath(uniqueFilename)
+//                    .build();
+//            CountDownLatch latch = new CountDownLatch(1);
+//            model.setLatch(latch);
+//            utils.processImages(model, latch, path, uniqueFilename);
+//            latch.await();
+//        } catch (IOException | InterruptedException ignored) {
+//        }
+//
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Access-Control-Allow-Origin", "*");
+//
+//        return ResponseEntity
+//                .ok()
+//                .headers(headers)
+//                .body(model);
+//    }
 
     @GetMapping(value = "/get/{imageName:.+}", produces = MediaType.IMAGE_JPEG_VALUE)
     public Resource getImage(@PathVariable String imageName) {
@@ -74,16 +74,20 @@ public class MainController {
                 .build();
     }
 
-    @PostMapping("/process2")
+    @PostMapping("/process")
     public ResponseEntity<?> process2(@RequestParam(value = "file", required = false) MultipartFile file) {
         if (file == null || file.isEmpty()) {
             return ResponseEntity.badRequest().body("file is empty");
         }
         Model model = null;
-        String uniqueFilename = UUID.randomUUID() + ".jpeg";
+        String UUID = String.valueOf(java.util.UUID.randomUUID());
+        String uniqueFilename = UUID + ".jpeg";
+        String uniqueFilename2 = "ai_"+UUID+".jpeg";
         String path = PATH_FOLDER + uniqueFilename;
+        String path2 = PATH_FOLDER + uniqueFilename2;
         try {
             Files.copy(file.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(file.getInputStream(), Paths.get(path2), StandardCopyOption.REPLACE_EXISTING);
             model = Model.builder()
                     .regularPath(uniqueFilename)
                     .build();
@@ -93,6 +97,12 @@ public class MainController {
             latch.await();
         } catch (IOException | InterruptedException ignored) {
         }
-        return ResponseEntity.ok(model);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Access-Control-Allow-Origin", "*");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(model);
     }
 }
