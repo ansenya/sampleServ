@@ -35,9 +35,13 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
     // opencv
-    implementation files('src/main/resources/libs/opencv-480.jar')
+    implementation files('src/main/resources/libs/opencv-470.jar')
 
     // Async
     implementation 'org.springframework.boot:spring-boot-starter-aop'
+
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+
 }
 

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/json-formatter-js/2.1.0/json-formatter.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .image {
+            margin-right: 20px;
+        }
+
+        .data {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .center-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* New styles for the JSON frame */
+        .highlight-source-json {
+            padding: 10px;
+            background-color: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+            white-space: pre-wrap;
+        }
+
+        .json-formatted {
+            border-radius: 6px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            background-color: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+<div class="center-container">
+    <div class="container">
+        <div class="image">
+            <img th:src="${img}" alt="Photo">
+        </div>
+        <div class="data">
+            <div id="formatted-json" class="json-formatted" th:text="${text}">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    // Function to format the JSON data
+    function formatJsonData(jsonData) {
+        var formatter = new JSONFormatter(jsonData, 1, {
+            hoverPreviewEnabled: false,
+            hoverPreviewArrayCount: 100,
+            hoverPreviewFieldCount: 5,
+            theme: 'light',
+        });
+
+        // Get the div where you want to display the formatted JSON
+        var formattedJsonDiv = document.getElementById('formatted-json');
+
+        // Clear the div and append the formatted JSON
+        formattedJsonDiv.innerHTML = '';
+        formattedJsonDiv.appendChild(formatter.render());
+    }
+
+    // Call the function with your JSON data
+    var jsonData = {
+        "regularPath": "http://localhost:8082/get/4ef3ec92-4ae0-423b-9c22-62c39cd16a01.jpg",
+        "aiPath": "http://localhost:8082/get/ai_4ef3ec92-4ae0-423b-9c22-62c39cd16a01.jpg",
+        "coloredPath": "http://localhost:8082/get/colored_4ef3ec92-4ae0-423b-9c22-62c39cd16a01.jpg",
+        "tags": "кот: 0.91 #98918B;",
+        "hexColor": "#C4C2C0"
+    };
+
+    formatJsonData(jsonData);
+</script>
+</html>
+
+
+

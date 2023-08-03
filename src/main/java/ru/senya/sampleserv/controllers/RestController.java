@@ -1,6 +1,5 @@
 package ru.senya.sampleserv.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -16,19 +15,18 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 
 import static ru.senya.sampleserv.utils.Utils.*;
 
-@RestController
-public class MainController {
+@org.springframework.web.bind.annotation.RestController
+public class RestController {
 
     final
     Utils utils;
 
-    public MainController(Utils utils) {
+    public RestController(Utils utils) {
         this.utils = utils;
     }
 
@@ -93,9 +91,11 @@ public class MainController {
                     .build();
             CountDownLatch latch = new CountDownLatch(1);
             model.setLatch(latch);
+            model.setImageName(file.getOriginalFilename());
             utils.processImages2(model, latch, path, uniqueFilename);
             latch.await();
-        } catch (IOException | InterruptedException ignored) {
+        } catch (Exception e) {
+            return ResponseEntity.status(418).build();
         }
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "*");
