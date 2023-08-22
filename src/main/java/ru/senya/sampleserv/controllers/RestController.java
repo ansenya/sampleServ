@@ -30,35 +30,6 @@ public class RestController {
         this.utils = utils;
     }
 
-//    @PostMapping("/process")
-//    public ResponseEntity<?> process(@RequestParam(value = "file", required = false) MultipartFile file) {
-//        if (file == null || file.isEmpty()) {
-//            return ResponseEntity.badRequest().body("file is empty");
-//        }
-//        Model model = null;
-//        String uniqueFilename = UUID.randomUUID() + ".jpeg";
-//        String path = PATH_FOLDER + uniqueFilename;
-//        try {
-//            Files.copy(file.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
-//            model = Model.builder()
-//                    .regularPath(uniqueFilename)
-//                    .build();
-//            CountDownLatch latch = new CountDownLatch(1);
-//            model.setLatch(latch);
-//            utils.processImages(model, latch, path, uniqueFilename);
-//            latch.await();
-//        } catch (IOException | InterruptedException ignored) {
-//        }
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.set("Access-Control-Allow-Origin", "*");
-//
-//        return ResponseEntity
-//                .ok()
-//                .headers(headers)
-//                .body(model);
-//    }
-
     @GetMapping(value = "/get/{imageName:.+}", produces = MediaType.IMAGE_JPEG_VALUE)
     public Resource getImage(@PathVariable String imageName) {
         return new FileSystemResource(PATH_FOLDER + imageName);
@@ -80,9 +51,10 @@ public class RestController {
         Model model = null;
         String UUID = String.valueOf(java.util.UUID.randomUUID());
         String uniqueFilename = UUID + ".jpeg";
-        String uniqueFilename2 = "ai_"+UUID+".jpeg";
+        String uniqueFilename2 = "ai_" + UUID + ".jpeg";
         String path = PATH_FOLDER + uniqueFilename;
         String path2 = PATH_FOLDER + uniqueFilename2;
+
         try {
             Files.copy(file.getInputStream(), Paths.get(path), StandardCopyOption.REPLACE_EXISTING);
             Files.copy(file.getInputStream(), Paths.get(path2), StandardCopyOption.REPLACE_EXISTING);
@@ -92,13 +64,23 @@ public class RestController {
             CountDownLatch latch = new CountDownLatch(1);
             model.setLatch(latch);
             model.setImageName(file.getOriginalFilename());
-            utils.processImages2(model, latch, path, uniqueFilename);
+            utils.process(model, latch, path, uniqueFilename);
             latch.await();
-        } catch (Exception e) {
-            return ResponseEntity.status(418).build();
+        } catch (IOException | InterruptedException e) {
+            return ResponseEntity.status(451).body("smth went wrong while saving file. how?");
         }
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("Access-Control-Allow-Origin", "*");
+
+        if (!model.isSuccess()) {
+            if (model.getEnTags().isEmpty() || model.getRuTags().isEmpty()) {
+                return ResponseEntity.status(409).body("tags are empty for some reason. probably efNetServer is not available. check it.");
+            }
+            if (model.getText() == null) {
+                return ResponseEntity.status(418).body("text was not generated. probably smth wrong with yandex token or folder id. try again.");
+            }
+        }
 
         return ResponseEntity
                 .ok()

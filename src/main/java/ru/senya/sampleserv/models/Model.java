@@ -5,6 +5,7 @@ import lombok.*;
 import org.opencv.core.Scalar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
 import static ru.senya.sampleserv.utils.Utils.SERVER_HOST;
@@ -14,7 +15,7 @@ import static ru.senya.sampleserv.utils.Utils.SERVER_HOST;
 @RequiredArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIgnoreProperties({"latch", "regularPath", "aiPath", "coloredPath"})
+@JsonIgnoreProperties({"latch", "regularPath", "aiPath", "coloredPath", "success"})
 @ToString
 public class Model {
     private String regularPath, aiPath, coloredPath;
@@ -25,10 +26,12 @@ public class Model {
     private ArrayList<String> ruTags = new ArrayList<>();
     @Builder.Default
     private ArrayList<String> enTags = new ArrayList<>();
+    private String text;
     private String hexColor;
     private Integer intColor;
     private double[] scalarColor;
     private CountDownLatch latch;
+    private boolean success = false;
 
     public void await() throws InterruptedException {
         if (latch != null) {
@@ -46,5 +49,18 @@ public class Model {
 
     public String getColoredPath() {
         return SERVER_HOST + "/get/" + coloredPath;
+    }
+
+    public String toJson() {
+        return "{" +
+                "\\\"imageName\\\": " + "\\\"" + imageName + "\\\"" + ", " +
+                "\\\"imageWidth\\\": " + imageWidth + ", " +
+                "\\\"imageHeight\\\": " + imageHeight + ", " +
+                "\\\"ruTags\\\": " + ruTags + ", " +
+                "\\\"enTags\\\": " + enTags + ", " +
+                "\\\"hexColor\\\": " + "\\\"" + hexColor + "\\\"" + ", " +
+                "\\\"intColor\\\":" + intColor + ", " +
+                "\\\"scalarColor\\\": " + Arrays.toString(scalarColor) +
+                "}";
     }
 }
