@@ -158,19 +158,31 @@ public class Utils {
                 int index = efNetEnTags.indexOf(tag.split(":")[0].trim());
                 if (index >= 0) {
                     ruTags.add(efNetRuTags.get(index) + " : " + Double.parseDouble(tag.split(":")[1].trim()));
+                    System.out.println(efNetRuTags.get(index));
                 }
             }
+
+            System.out.println();
+            System.out.println();
+
             for (String tag : v4tags) {
                 int index = yolov4labels.indexOf(tag.split(":")[0].trim());
                 if (index >= 0) {
                     String ruTag = yolov4ruLabels.get(index) + " : " + Double.parseDouble(tag.split(":")[1]);
                     ruTags.add(ruTag);
+                    System.out.println(ruTag);
                 }
             }
+
+            System.out.println();
+            System.out.println();
+
+
             for (String tag : v9000tags) {
                 int index = yolo9000labels.indexOf(tag.split(":")[0].trim());
                 if (index >= 0) {
                     ruTags.add(yolo9000ruLabels.get(index) + " : " + Double.parseDouble(tag.split(":")[1]));
+                    System.out.println(yolo9000ruLabels.get(index));
                 }
             }
 
@@ -443,7 +455,7 @@ public class Utils {
                 "  \"model\": \"general\",\n" +
                 "  \"generationOptions\": {\n" +
                 "    \"partialResults\": false,\n" +
-                "    \"temperature\"" + ": 0.28," +
+                "    \"temperature\"" + ": 1.0," +
                 "    \"maxTokens\": 7500\n" +
                 "  },\n" +
                 "  \"instructionText\": \"" + "ты пишешь текст описание фотографии для фотостока. " + text + "\"" +

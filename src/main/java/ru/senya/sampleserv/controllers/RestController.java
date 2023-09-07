@@ -45,6 +45,8 @@ public class RestController {
 
     @PostMapping("/process")
     public ResponseEntity<?> process2(@RequestParam(value = "file", required = false) MultipartFile file) {
+
+        System.out.println("запрос");
         if (file == null || file.isEmpty()) {
             return ResponseEntity.badRequest().body("file is empty");
         }
