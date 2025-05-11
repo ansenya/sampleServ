@@ -36,7 +36,7 @@ public class Utils {
 
     private static String yandexToken;
     private static String url = "https://llm.api.cloud.yandex.net/llm/v1alpha/chat";
-    private static String x_folder_id = "b1g919216h0usde9431e";
+    private static String x_folder_id = "<x-folder-id>";
     String[] yolo9000command = {
             "src/main/resources/libs/darknet/darknet",
             "detector",
@@ -220,7 +220,7 @@ public class Utils {
         Gson gson = new Gson();
 
         String body = "{\n" +
-                "    \"yandexPassportOauthToken\": \"y0_AgAAAAArbTLAAATuwQAAAADpLndikDIdjcsCRBafZ_UeQXn2eR5-gRk\"\n" +
+                "    \"yandexPassportOauthToken\": \"<oauth-token>\"\n" +
                 "}";
         System.out.println(body);
 
